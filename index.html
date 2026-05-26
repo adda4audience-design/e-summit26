@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIET KUK E-Summit | The Shift</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #030101; 
+            --brand-red: #e62b2b;
+            --brand-yellow: #fca311;
+            --text-white: #f5f5f5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            margin: 0; padding: 0; overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, p, span, a, li {
+            text-shadow: 
+                0 2px 4px rgba(0,0,0,1), 
+                0 8px 20px rgba(0,0,0,0.9), 
+                0 0 40px rgba(0,0,0,0.8) !important;
+        }
+
+        h1 span { 
+            text-shadow: 
+                0 0 30px rgba(230, 43, 43, 0.5), 
+                0 4px 10px rgba(0,0,0,1),
+                0 10px 30px rgba(0,0,0,0.9) !important; 
+        }
+
+        header {
+            position: fixed;height : 70px;overflow: hidden; top: 0; left: 0; width: 100%; z-index: 100;
+            padding: 20px 5%; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(3, 1, 1, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .logo { text-decoration: none; display: flex; align-items: center; }
+        .header-logo { height: 130px; width: auto; object-fit: contain; transition: transform 0.3s ease; }
+        .header-logo:hover { transform: scale(1.05); }
+
+        .burger { width: 30px; height: 20px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; z-index: 101; }
+        .burger div { width: 100%; height: 2px; background-color: var(--text-white); transition: all 0.3s ease; }
+        .burger.active .line1 { transform: rotate(-45deg) translate(-5px, 6px); background-color: var(--brand-red); }
+        .burger.active .line2 { opacity: 0; }
+        .burger.active .line3 { transform: rotate(45deg) translate(-6px, -8px); background-color: var(--brand-red); }
+
+        .nav-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: rgba(3, 1, 1, 0.95); backdrop-filter: blur(15px);
+            z-index: 99; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .nav-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .nav-links { list-style: none; text-align: center; width: 100%; padding: 0 20px;}
+        .nav-links li { margin: 20px 0; transform: translateY(20px); opacity: 0; transition: all 0.4s ease; }
+        .nav-overlay.active .nav-links li { transform: translateY(0); opacity: 1; }
+        
+        .nav-overlay.active .nav-links li:nth-child(1) { transition-delay: 0.1s; }
+        .nav-overlay.active .nav-links li:nth-child(2) { transition-delay: 0.15s; }
+        .nav-overlay.active .nav-links li:nth-child(3) { transition-delay: 0.2s; }
+        .nav-overlay.active .nav-links li:nth-child(4) { transition-delay: 0.25s; }
+        .nav-overlay.active .nav-links li:nth-child(5) { transition-delay: 0.3s; }
+        .nav-overlay.active .nav-links li:nth-child(6) { transition-delay: 0.35s; }
+        .nav-overlay.active .nav-links li:nth-child(7) { transition-delay: 0.4s; }
+        .nav-overlay.active .nav-links li:nth-child(8) { transition-delay: 0.45s; }
+
+        .nav-links a { text-decoration: none; color: var(--text-white); font-size: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; transition: color 0.3s ease; }
+        .nav-links a:hover { color: var(--brand-yellow); }
+
+        .nav-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap;}
+        .nav-buttons a { font-size: 1.2rem; padding: 12px 30px; letter-spacing: 2px;}
+
+        /* --- 3D CANVAS & LAYOUT --- */
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+        .scroll-container { position: relative; z-index: 10; width: 100%; }
+
+        section { width: 100%; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 120px 8%; align-items: center; text-align: center; }
+
+        .ui-panel { opacity: 0; transform: translateY(30px); max-width: 1000px; width: 100%; position: relative; }
+        #journey .ui-panel { max-width: 1200px; } 
+        #events .ui-panel { max-width: 1400px; } 
+
+        .ui-panel::before {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 140%; height: 140%; background: radial-gradient(circle, rgba(3,1,1,0.85) 0%, rgba(3,1,1,0.6) 40%, transparent 70%);
+            z-index: -1; pointer-events: none;
+        }
+
+        /* --- HERO TYPOGRAPHY & THICKER SHINY ACCENTS --- */
+        .hero-top { color: var(--text-white); font-weight: 600; letter-spacing: 12px; font-size: 1.2rem; margin-bottom: 5px; text-transform: uppercase; }
+        .hero-main-wrapper { position: relative; display: inline-block; margin-bottom: 10px; }
+        .hero-main { font-size: clamp(4.5rem, 12vw, 10rem); font-weight: 900; line-height: 1.1; margin: 0; position: relative; z-index: 2; text-transform: uppercase; letter-spacing: 2px; white-space: nowrap;}
+        
+        .hero-accent-1 { position: absolute; bottom: 35%; left: -10%; width: 45%; height: 10px; background: var(--brand-red); z-index: 1; box-shadow: 0 0 15px var(--brand-red); overflow: hidden;}
+        .hero-accent-2 { position: absolute; top: 35%; right: -5%; width: 35%; height: 8px; background: var(--brand-yellow); z-index: 1; box-shadow: 0 0 10px var(--brand-yellow); overflow: hidden;}
+        
+        .hero-accent-1::after, .hero-accent-2::after {
+            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transform: skewX(-45deg); animation: shine 1.5s infinite;
+        }
+        @keyframes shine {
+            0% { left: -150%; }
+            20% { left: 150%; } 
+            100% { left: 150%; } 
+        }
+        
+        .hero-bottom { font-size: clamp(1rem, 3vw, 1.8rem); color: var(--text-white); letter-spacing: 15px; font-weight: 800; margin-bottom: 50px; text-transform: uppercase; white-space: nowrap;}
+        .hero-bottom .highlight { color: var(--brand-red); text-shadow: 0 0 15px rgba(230,43,43,0.8) !important;}
+
+        .hero-buttons { display: flex; gap: 20px; justify-content: center; }
+        .btn-primary, .btn-secondary { padding: 15px 40px; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; border-radius: 4px; transition: all 0.3s ease; }
+        .btn-primary { background: var(--brand-red); color: var(--text-white); border: 2px solid var(--brand-red); }
+        .btn-primary:hover { background: transparent; box-shadow: 0 0 20px rgba(230,43,43,0.5); }
+        .btn-secondary { background: transparent; color: var(--text-white); border: 2px solid var(--text-white); }
+        .btn-secondary:hover { background: var(--text-white); color: var(--bg-color); box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+
+        h2 { font-size: clamp(2.5rem, 7vw, 4.5rem); font-weight: 800; color: var(--brand-yellow); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; text-align: center;}
+        .subtitle { font-size: 1.1rem; line-height: 1.6; color: #e0e0e0; margin-bottom: 30px; font-weight: 400; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;}
+
+        @media (max-width: 768px) {
+            section { min-height: auto; padding: 80px 5%; }
+            #hero { min-height: 100vh; } 
+            .nav-links li { margin: 15px 0; }
+            .nav-links a { font-size: 1.3rem; }
+            .nav-buttons a { padding: 10px 20px; font-size: 1rem; width: 100%; text-align: center;}
+            #hero .ui-panel { padding: 0 10px;}
+            .hero-top { font-size: 0.8rem; letter-spacing: 6px; }
+            .hero-main { font-size: 14vw; padding: 20px 0; } 
+            .hero-bottom { font-size: 4vw; letter-spacing: 4px; }
+            .hero-accent-1 { bottom: 25%; left: -5%; width: 50%; height: 6px;}
+            .hero-accent-2 { top: 25%; right: 0%; width: 40%; height: 5px;}
+            .hero-buttons { flex-direction: column; gap: 15px; align-items: center; width: 100%; margin-top: 15px;}
+            .btn-primary, .btn-secondary { width: 90%; text-align: center; }
+            .sponsor-logo { height: 40px; margin: 0 15px; max-width: 120px; }
+            .card-grid { padding: 0 10px; }
+        }
+
+        .card-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%; }
+        
+        .glass-card {
+            background: rgba(8, 2, 2, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(230, 43, 43, 0.3); border-top: 4px solid var(--brand-red); 
+            padding: 30px; width: 280px; box-shadow: 0 15px 30px rgba(0,0,0,0.6); 
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+        .glass-card:hover { transform: translateY(-8px); border-color: var(--brand-yellow); border-top-color: var(--brand-yellow); background: rgba(20, 4, 4, 0.9); box-shadow: 0 15px 40px rgba(230, 43, 43, 0.2); }
+        .glass-card h3 { color: var(--text-white); font-size: 1.3rem; margin-bottom: 8px; font-weight: 800; text-transform: uppercase;}
+        .glass-card p { color: #ccc; font-size: 0.9rem; line-height: 1.5; }
+
+        .speaker-card {
+            flex: 0 0 250px; scroll-snap-align: start; text-align: center;
+            background: rgba(8, 2, 2, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-top: 4px solid var(--brand-yellow);
+            padding: 30px 20px; border-radius: 10px; transition: transform 0.3s ease;
+        }
+        .speaker-card:hover { transform: translateY(-10px); border-color: var(--brand-yellow); }
+        .speaker-photo { width: 120px; height: 120px; border-radius: 50%; background: #222; margin: 0 auto 15px auto; border: 2px solid var(--brand-red); overflow: hidden; }
+        .speaker-photo img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+        
+        footer {
+            width: 100%; padding: 60px 8% 30px 8%;
+            background: linear-gradient(to top, rgba(10,2,2,0.95), transparent);
+            border-top: 1px solid rgba(230, 43, 43, 0.2);
+        }
+        .footer-logo { height: 150px; width: auto; object-fit: contain; opacity: 0.8; transition: opacity 0.3s; }
+        .footer-logo:hover { opacity: 1; }
+        .footer-content { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px; margin-bottom: 40px; text-align: left;}
+        .footer-col h4 { color: var(--brand-yellow); margin-bottom: 15px; font-size: 1.2rem; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 10px; }
+        .footer-col a { color: #aaa; text-decoration: none; transition: color 0.3s; }
+        .footer-col a:hover { color: var(--text-white); }
+        .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: #666; font-size: 0.8rem; }
+
+        .marquee-wrapper {
+            display: flex; overflow: hidden; width: 100vw; max-width: 1200px; margin: 15px auto;
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .marquee-track { display: flex; gap: 20px; width: max-content; align-items: center; animation: scroll-left 25s linear infinite; }
+        .marquee-track.reverse { animation: scroll-right 25s linear infinite; }
+        .marquee-track:hover { animation-play-state: paused; } 
+
+        @keyframes scroll-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes scroll-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+
+        .journey-img {
+            width: 200px; height: 130px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+            filter: grayscale(100%); transition: filter 0.4s ease, transform 0.4s ease; cursor: pointer;
+        }
+        .journey-img:hover, .journey-img:active { filter: grayscale(0%); transform: scale(1.05); border-color: var(--brand-red); z-index: 5; position: relative; }
+        @media (min-width: 768px) { .journey-img { width: 280px; height: 180px; } }
+
+        .social-mini-tab { display: flex; gap: 30px; justify-content: center; margin-top: 30px; opacity: 0.6; transition: opacity 0.3s ease; }
+        .social-mini-tab:hover { opacity: 1; }
+        .social-mini-tab a { color: var(--text-white); text-decoration: none; font-size: 1.8rem; transition: color 0.3s, transform 0.3s; }
+        .social-mini-tab a:hover { color: var(--brand-red); transform: translateY(-3px); }
+
+        .flip-card {
+            background: transparent; width: 100%; max-width: 260px; height: 420px; 
+            perspective: 1000px; flex-shrink: 0;
+        }
+
+        .flip-card-inner {
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner, .flip-card:active .flip-card-inner { transform: rotateY(180deg); }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            border-radius: 12px; padding: 20px; display: flex; flex-direction: column;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden; 
+        }
+
+        .flip-card-front {
+            background: linear-gradient(145deg, rgba(20,4,4,0.95), rgba(3,1,1,0.95));
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            justify-content: flex-start;
+        }
+
+        .flip-card-front h3 { font-size: 1.2rem; color: var(--brand-yellow); text-transform: uppercase; margin-top: auto; padding-bottom: 15px;}
+
+        .game-img-placeholder {
+            width: 100%; height: 280px; 
+            background: rgba(230, 43, 43, 0.1);
+            border: 1px solid rgba(230, 43, 43, 0.3); border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);
+        }
+
+        .flip-card-back {
+            background: rgba(20,4,4,0.98);
+            border-color: var(--brand-red);
+            box-shadow: 0 15px 40px rgba(230, 43, 43, 0.2);
+            transform: rotateY(180deg);
+            justify-content: center; text-align: left;
+        }
+
+        .flip-card-back h3 { color: var(--text-white); margin-bottom: 15px; font-size: 1.4rem;}
+        .flip-card-back p { font-size: 0.9rem; color: #ccc; line-height: 1.5; margin-bottom: 20px;}
+
+        /* --- THE HOLOGRAPHIC GOLDEN SHINE --- */
+        .flip-card-front::after, .flip-card-back::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -200%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(
+                105deg,
+                transparent 20%,
+                rgba(252, 163, 17, 0.1) 25%,     
+                rgba(255, 235, 130, 0.5) 50%,    
+                rgba(252, 163, 17, 0.1) 75%,
+                transparent 80%
+            );
+            transform: skewX(-25deg);
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0; 
+            transition: left 0.6s cubic-bezier(0.4, 0.2, 0.2, 1), opacity 0.1s ease;
+        }
+
+        .flip-card:hover .flip-card-front::after,
+        .flip-card:active .flip-card-front::after,
+        .flip-card:hover .flip-card-back::after,
+        .flip-card:active .flip-card-back::after {
+            left: 200%; 
+            opacity: 1; 
+        }
+
+        .event-meta { background: rgba(252, 163, 17, 0.1); padding: 10px; border-left: 3px solid var(--brand-yellow); border-radius: 4px; }
+        .event-meta span { display: block; font-size: 0.85rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; }
+        .event-meta span i { margin-right: 8px; }
+
+        #events-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; }
+        #events-grid .flip-card:nth-child(n+3) { display: none; } 
+
+        .view-all-btn {
+            background: transparent; color: var(--brand-yellow); border: 2px solid var(--brand-yellow); padding: 12px 30px;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem;
+            border-radius: 6px; cursor: pointer; transition: all 0.3s; margin-top: 40px; display: inline-block;
+        }
+        .view-all-btn:hover { background: var(--brand-yellow); color: var(--bg-color); box-shadow: 0 0 20px rgba(252, 163, 17, 0.4); }
+
+        @media (min-width: 1024px) {
+            #events-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
+            #events-grid .flip-card { max-width: none; } 
+            #events-grid .flip-card:nth-child(n+3) { display: block; } 
+            #events-grid .flip-card:nth-child(n+6) { display: none; } 
+        }
+
+        #events-grid.expanded .flip-card { display: block !important; }
+
+        .sponsor-logo { height: 90px; width: auto; max-width: 250px; object-fit: contain; filter: grayscale(100%) opacity(0.5); transition: all 0.3s ease; margin: 0 40px; }
+        .sponsor-logo:hover { filter: grayscale(0%) opacity(1); }
+        #sponsors .marquee-wrapper:first-of-type { margin-bottom: 40px; }
+    </style>
+</head>
+<body>
+
+    <header id="navbar">
+        <a href="#" class="logo"><img src="e-logo.png" alt="UIET KUK Logo" class="header-logo"></a>
+        <div class="burger" id="burger-menu">
+            <div class="line1"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+    </header>
+
+    <div class="nav-overlay" id="nav-overlay">
+        <ul class="nav-links">
+            <li><a href="#hero" class="nav-item">Home</a></li>
+            <li><a href="#about" class="nav-item">About</a></li>
+            <li><a href="#journey" class="nav-item">Journey</a></li>
+            <li><a href="#events" class="nav-item">Events</a></li>
+            <li><a href="#speakers" class="nav-item">Speakers</a></li>
+            <li><a href="#sponsors" class="nav-item">Sponsors</a></li>
+            <li><a href="campus.html" class="nav-item">Campus</a></li>
+            <li class="nav-buttons">
+                <a href="register.html" class="btn-primary nav-item">Register</a>
+                <a href="register.html" class="btn-secondary nav-item">Login</a>
+            </li>
+        </ul>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="scroll-container">
+        
+        <section id="hero">
+            <div class="ui-panel">
+                <p class="hero-top">UIET KURUKSHETRA</p>
+                
+                <div class="hero-main-wrapper">
+                    <h1 class="hero-main">E-SUMMIT</h1>
+                    <div class="hero-accent-1"></div>
+                    <div class="hero-accent-2"></div>
+                </div>
+                
+                <p class="hero-bottom"><span class="highlight">I</span>GNITING &nbsp;<span class="highlight">T</span>HE &nbsp;<span class="highlight">S</span>HIFT</p>
+                
+                <div class="hero-buttons">
+                    <a href="register.html" class="btn-primary">Register</a>
+                    <a href="register.html" class="btn-secondary">Login</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <div class="ui-panel">
+                <h2>THE CORE <span style="color: var(--text-white); font-weight: 300;">MISSION</span></h2>
+                <p class="subtitle">E-Summit 2026 is not just an event; it's a catalyst. We are bringing together the sharpest technical minds, visionary founders, and ruthless investors to Kurukshetra. It's time to stop adapting to the future and start building it.</p>
+                <div class="card-grid">
+                    <div class="glass-card">
+                        <h3 style="color: var(--brand-yellow); font-size: 2.5rem;">2+</h3>
+                        <p>Days of Innovation</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--brand-yellow); font-size: 2.5rem;">50+</h3>
+                        <p>Industry Leaders</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="journey">
+            <div class="ui-panel">
+                <h2>TRACK THE <span style="color: var(--text-white); font-weight: 300;">JOURNEY</span></h2>
+                <p class="subtitle">Witness the execution. Join our Journey and see how we planned the Event.</p>
+                
+                <div class="marquee-wrapper">
+                    <div class="marquee-track">
+                        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Event Prep">
+                        <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Tech Setup">
+                        <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Meeting">
+                        <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Networking">
+                        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Event Prep">
+                        <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Tech Setup">
+                        <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Meeting">
+                        <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Networking">
+                    </div>
+                </div>
+
+                <div class="marquee-wrapper">
+                    <div class="marquee-track reverse">
+                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Planning">
+                        <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Team">
+                        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32d7?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Execution">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Coding">
+                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Planning">
+                        <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Team">
+                        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32d7?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Execution">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Coding">
+                    </div>
+                </div>
+
+                <div class="social-mini-tab">
+                    <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://twitter.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <section id="events">
+            <div class="ui-panel">
+                <h2>PLANNED <span style="color: var(--text-white); font-weight: 300;">EVENTS</span></h2>
+                <p class="subtitle">Massive energy events designed to accelerate your growth. Enter the gravity well of innovation.</p>
+                
+                <div id="events-grid">
+                    
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ Hackathon Visual ]</div>
+                                <h3>Hackathon 2.0</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Hackathon 2.0</h3>
+                                <p>48 hours of relentless coding. Build solutions that shift paradigms and win massive bounties.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 12, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 10:00 AM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ Pitch Desk Visual ]</div>
+                                <h3>Pitch Desk</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Pitch Desk</h3>
+                                <p>Face the investors. Survive the heat and scale your startup to orbital velocity.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 13, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 2:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ Workshop Visual ]</div>
+                                <h3>Workshops</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Workshops</h3>
+                                <p>Deep-dive technical sessions on Web3, AI, and hardware scaling directly from experts.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 12-14, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> Various</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ Web3 Panel Visual ]</div>
+                                <h3>Web3 Panel</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Web3 Panel</h3>
+                                <p>Explore decentralized futures with founders who are building the infrastructure of tomorrow.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 13, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 11:30 AM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ AI Hack Visual ]</div>
+                                <h3>AI Prompt Hack</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>AI Prompt Hack</h3>
+                                <p>Master the machines. Compete to engineer the most complex and accurate AI outputs.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 14, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 9:00 AM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ E-Sports Visual ]</div>
+                                <h3>E-Sports Clash</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>E-Sports Clash</h3>
+                                <p>High-stakes gaming tournaments. Form your squad and dominate the virtual arena.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 12-13, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 5:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ UI/UX Visual ]</div>
+                                <h3>Design Relay</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Design Relay</h3>
+                                <p>A fast-paced UI/UX challenge testing your design thinking and rapid prototyping skills.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 13, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 1:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ Robotics Visual ]</div>
+                                <h3>Robo Wars</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Robo Wars</h3>
+                                <p>Bring your hardware. Battle the best engineering chassis in a heavy-metal combat ring.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 14, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 3:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ Founders Visual ]</div>
+                                <h3>Founder's Story</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Founder's Story</h3>
+                                <p>Fireside chats with unicorn founders sharing their untold stories of struggle and scale.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 14, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 6:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="game-img-placeholder">[ Mixer Visual ]</div>
+                                <h3>Tech Mixer</h3>
+                            </div>
+                            <div class="flip-card-back">
+                                <h3>Tech Mixer</h3>
+                                <p>Exclusive networking sessions connecting raw talent directly with VC funds and recruiters.</p>
+                                <div class="event-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Nov 14, 2026</span>
+                                    <span style="margin-top: 5px;"><i class="fa-regular fa-clock"></i> 8:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <button id="toggle-events-btn" class="view-all-btn">View All Events</button>
+            </div>
+        </section>
+        
+        <section id="speakers">
+            <div class="ui-panel" style="max-width: 1000px;">
+                <h2>OUR <span style="color: var(--text-white); font-weight: 300;">SPEAKERS</span></h2>
+                <p class="subtitle">Meet the visionary minds orbiting our ecosystem.</p>
+                
+                <div class="marquee-wrapper">
+                    <div class="marquee-track">
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Arjun Sethi</h3><p>CEO, Tech Innovators</p>
+                        </div>
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Priya Sharma</h3><p>Founder, ScaleUp VC</p>
+                        </div>
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Rohan Das</h3><p>VP, Global Disrupt</p>
+                        </div>
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Neha Gupta</h3><p>AI Lead, NeuralNet</p>
+                        </div>
+                        
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Arjun Sethi</h3><p>CEO, Tech Innovators</p>
+                        </div>
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Priya Sharma</h3><p>Founder, ScaleUp VC</p>
+                        </div>
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Rohan Das</h3><p>VP, Global Disrupt</p>
+                        </div>
+                        <div class="speaker-card">
+                            <div class="speaker-photo"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80" loading="lazy" alt="Speaker"></div>
+                            <h3>Neha Gupta</h3><p>AI Lead, NeuralNet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sponsors">
+            <div class="ui-panel">
+                <h2>OUR <span style="color: var(--text-white); font-weight: 300;">BACKERS</span></h2>
+                <p class="subtitle">Fueled by industry giants and incubation pioneers.</p>
+                
+                <div class="marquee-wrapper">
+                    <div class="marquee-track">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" loading="lazy" class="sponsor-logo" alt="Google">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" loading="lazy" class="sponsor-logo" alt="Microsoft">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" loading="lazy" class="sponsor-logo" alt="Amazon">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Cisco_logo_blue_2016.svg" loading="lazy" class="sponsor-logo" alt="Cisco">
+                        
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" loading="lazy" class="sponsor-logo" alt="Google">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" loading="lazy" class="sponsor-logo" alt="Microsoft">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" loading="lazy" class="sponsor-logo" alt="Amazon">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Cisco_logo_blue_2016.svg" loading="lazy" class="sponsor-logo" alt="Cisco">
+                    </div>
+                </div>
+
+                <div class="marquee-wrapper">
+                    <div class="marquee-track reverse">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" loading="lazy" class="sponsor-logo" alt="IBM">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Intel_logo_%282020%2C_light_blue%29.svg" loading="lazy" class="sponsor-logo" alt="Intel">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg" loading="lazy" class="sponsor-logo" alt="TCS">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg" loading="lazy" class="sponsor-logo" alt="Infosys">
+                        
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" loading="lazy" class="sponsor-logo" alt="IBM">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Intel_logo_%282020%2C_light_blue%29.svg" loading="lazy" class="sponsor-logo" alt="Intel">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg" loading="lazy" class="sponsor-logo" alt="TCS">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg" loading="lazy" class="sponsor-logo" alt="Infosys">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer id="footer">
+            <div class="footer-content ui-panel" style="max-width: 1200px; margin: 0 auto; transform: none; opacity: 1;">
+                <div class="footer-col">
+                    <a href="#" class="logo"><img src="e-logo.png" alt="UIET KUK Logo" class="footer-logo"></a>
+                    <p style="margin-top: 15px; color: #888; max-width: 300px;">Igniting the shift in technology and entrepreneurship. Join the revolution.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#events">Schedule</a></li>
+                        <li><a href="#speakers">Speakers</a></li>
+                        <li><a href="campus.html">Campus</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact Command</h4>
+                    <ul>
+                        <li>esummit@uietkuk.ac.in</li>
+                        <li>+91 9718023172</li>
+                        <li>Kurukshetra University, Haryana</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 UIET KUK E-Summit. All systems nominal.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const burger = document.getElementById('burger-menu');
+        const navOverlay = document.getElementById('nav-overlay');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        burger.addEventListener('click', () => {
+            burger.classList.toggle('active');
+            navOverlay.classList.toggle('active');
+        });
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                burger.classList.remove('active');
+                navOverlay.classList.remove('active');
+            });
+        });
+
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const header = document.getElementById('navbar');
+            
+            if (currentScroll <= 0) {
+                header.style.transform = "translateY(0)";
+            } else if (currentScroll > lastScroll && !navOverlay.classList.contains('active')) {
+                header.style.transform = "translateY(-100%)";
+            } else {
+                header.style.transform = "translateY(0)";
+            }
+            lastScroll = currentScroll;
+        });
+
+        const toggleBtn = document.getElementById('toggle-events-btn');
+        const eventsGrid = document.getElementById('events-grid');
+
+        toggleBtn.addEventListener('click', () => {
+            eventsGrid.classList.toggle('expanded');
+            if (eventsGrid.classList.contains('expanded')) {
+                toggleBtn.innerText = 'Close Events';
+            } else {
+                toggleBtn.innerText = 'View All Events';
+                document.getElementById('events').scrollIntoView({ behavior: 'smooth' });
+            }
+            setTimeout(() => { ScrollTrigger.refresh(); }, 350);
+        });
+
+        // ==========================================
+        // THREE.JS
+        // ==========================================
+        gsap.registerPlugin(ScrollTrigger);
+
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x030101, 0.002); 
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
+
+        function updateCameraPosition() {
+            if (window.innerWidth <= 768) {
+                camera.position.set(0, 5, 100); 
+            } else {
+                camera.position.set(0, 0, 50); 
+            }
+        }
+        updateCameraPosition();
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const glowMat = new THREE.PointsMaterial({ size: 0.4, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false });
+
+        const celestialGroup = new THREE.Group();
+        const planetGeo = new THREE.IcosahedronGeometry(40, 2);
+        const planetMat = new THREE.MeshBasicMaterial({ color: 0xe62b2b, wireframe: true, transparent: true, opacity: 0.15 });
+        
+        const planet1 = new THREE.Mesh(planetGeo, planetMat);
+        planet1.position.set(-80, 40, -100);
+        celestialGroup.add(planet1);
+
+        const planet2 = new THREE.Mesh(planetGeo, planetMat);
+        planet2.scale.set(1.5, 1.5, 1.5);
+        planet2.position.set(120, -50, -300);
+        celestialGroup.add(planet2);
+
+        const planet3 = new THREE.Mesh(planetGeo, planetMat);
+        planet3.position.set(-150, 20, -800);
+        celestialGroup.add(planet3);
+
+        const rockGeo = new THREE.DodecahedronGeometry(2, 0); 
+        const rockMat = new THREE.MeshBasicMaterial({ color: 0x330505 }); 
+        const wireMat = new THREE.MeshBasicMaterial({ color: 0xe62b2b, wireframe: true, transparent: true, opacity: 0.3 });
+
+        const asteroids = [];
+        for(let i=0; i<100; i++) {
+            const rock = new THREE.Group();
+            const solid = new THREE.Mesh(rockGeo, rockMat);
+            const wire = new THREE.Mesh(rockGeo, wireMat);
+            wire.scale.set(1.05, 1.05, 1.05); 
+            rock.add(solid); rock.add(wire);
+
+            rock.position.set(
+                (Math.random() - 0.5) * 200,
+                (Math.random() - 0.5) * 150,
+                50 - (Math.random() * 1000)
+            );
+            
+            const scale = 0.5 + Math.random() * 2;
+            rock.scale.set(scale, scale, scale);
+            
+            rock.userData = { rx: (Math.random() - 0.5) * 0.02, ry: (Math.random() - 0.5) * 0.02 };
+            asteroids.push(rock);
+            celestialGroup.add(rock);
+        }
+        scene.add(celestialGroup);
+
+        const starsGeo = new THREE.BufferGeometry();
+        const starCount = 15000; 
+        const starsPos = new Float32Array(starCount * 3);
+        const starsCol = new Float32Array(starCount * 3);
+        for(let i=0; i<starCount; i++) {
+            starsPos[i*3] = (Math.random() - 0.5) * 1200; 
+            starsPos[i*3+1] = (Math.random() - 0.5) * 1200;
+            starsPos[i*3+2] = 50 - (Math.random() * 1500); 
+            const brightness = 0.4 + Math.random() * 0.6; 
+            starsCol[i*3] = brightness; starsCol[i*3+1] = brightness; starsCol[i*3+2] = brightness;   
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+        starsGeo.setAttribute('color', new THREE.BufferAttribute(starsCol, 3));
+        const stars = new THREE.Points(starsGeo, glowMat);
+        scene.add(stars);
+
+        const riftGroup = new THREE.Group();
+        const riftGeo = new THREE.BufferGeometry();
+        const riftPos = new Float32Array(4000 * 3);
+        const riftCol = new Float32Array(4000 * 3);
+        for(let i=0; i<4000; i++) {
+            const u = Math.random() * Math.PI * 2; const v = Math.random() * Math.PI * 2;
+            const x = (22 + 8 * Math.cos(v)) * Math.cos(u); const y = (22 + 8 * Math.cos(v)) * Math.sin(u); const z = 8 * Math.sin(v) + (Math.random()-0.5)*5;
+            riftPos[i*3] = x; riftPos[i*3+1] = y; riftPos[i*3+2] = z;
+            const dist = Math.sqrt(x*x + y*y);
+            let color = new THREE.Color(0xe62b2b); if(dist > 25) color = new THREE.Color(0xfca311); 
+            riftCol[i*3] = color.r; riftCol[i*3+1] = color.g; riftCol[i*3+2] = color.b;
+        }
+        riftGeo.setAttribute('position', new THREE.BufferAttribute(riftPos, 3));
+        riftGeo.setAttribute('color', new THREE.BufferAttribute(riftCol, 3));
+        const rift = new THREE.Points(riftGeo, glowMat);
+        riftGroup.add(rift);
+        scene.add(riftGroup);
+
+        const pulsarGroup = new THREE.Group();
+        pulsarGroup.position.set(35, 0, -400); 
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(3000 * 3);
+        const pCol = new Float32Array(3000 * 3);
+        for(let i=0; i<3000; i++) {
+            let x,y,z;
+            if(Math.random() > 0.4) {
+                const r = Math.cbrt(Math.random()) * 8; const theta = Math.random() * 2 * Math.PI; const phi = Math.acos(2 * Math.random() - 1);
+                x = r * Math.sin(phi) * Math.cos(theta); y = r * Math.sin(phi) * Math.sin(theta); z = r * Math.cos(phi);
+                pCol[i*3] = 0.98; pCol[i*3+1] = 0.63; pCol[i*3+2] = 0.06;
+            } else {
+                const height = (Math.random() - 0.5) * 150; const radius = Math.random() * 2; const angle = Math.random() * 2 * Math.PI;
+                x = Math.cos(angle) * radius; y = height; z = Math.sin(angle) * radius;
+                pCol[i*3] = 0.9; pCol[i*3+1] = 0.16; pCol[i*3+2] = 0.16;
+            }
+            pPos[i*3] = x; pPos[i*3+1] = y; pPos[i*3+2] = z;
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3)); pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+        const pulsar = new THREE.Points(pGeo, glowMat); pulsarGroup.add(pulsar); pulsarGroup.rotation.z = 0.4;
+        scene.add(pulsarGroup);
+
+        const galaxyGroup = new THREE.Group();
+        galaxyGroup.position.set(-15, -20, -600); 
+        const galGeo = new THREE.BufferGeometry();
+        const galPos = new Float32Array(12000 * 3);
+        const galCol = new Float32Array(12000 * 3);
+        const coreCol = new THREE.Color('#fca311'); const edgeCol = new THREE.Color('#e62b2b'); 
+        for(let i=0; i<12000; i++) {
+            const radius = Math.random() * 120; const spinAngle = radius * 0.05; const branchAngle = ((i % 3) / 3) * Math.PI * 2;
+            const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 6;
+            const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 4;
+            const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 6;
+            galPos[i*3] = Math.cos(branchAngle + spinAngle) * radius + randomX; galPos[i*3+1] = randomY; galPos[i*3+2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+            const mixedColor = coreCol.clone(); mixedColor.lerp(edgeCol, radius / 120);
+            galCol[i*3] = mixedColor.r; galCol[i*3+1] = mixedColor.g; galCol[i*3+2] = mixedColor.b;
+        }
+        galGeo.setAttribute('position', new THREE.BufferAttribute(galPos, 3)); galGeo.setAttribute('color', new THREE.BufferAttribute(galCol, 3));
+        const galaxy = new THREE.Points(galGeo, glowMat); galaxyGroup.rotation.x = 0.4; galaxyGroup.add(galaxy);
+        scene.add(galaxyGroup);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            planet1.rotation.y += 0.001; planet1.rotation.x += 0.0005; planet2.rotation.y -= 0.0005; planet3.rotation.y += 0.001;
+            asteroids.forEach(rock => { rock.rotation.x += rock.userData.rx; rock.rotation.y += rock.userData.ry; });
+            riftGroup.rotation.z -= 0.002; pulsar.rotation.y += 0.04; galaxyGroup.rotation.y -= 0.002; 
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.updateProjectionMatrix(); 
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            updateCameraPosition();
+        });
+
+        // ==========================================
+        // INITIALIZE SCROLL ANIMATIONS DIRECTLY
+        // ==========================================
+        function initScrollAnimations() {
+            gsap.to("#hero .ui-panel", { opacity: 1, y: 0, duration: 1, ease: "power3.out" });
+
+            let targetZ = window.innerWidth <= 768 ? -950 : -850; 
+
+            let tl = gsap.timeline({
+                scrollTrigger: { trigger: ".scroll-container", start: "top top", end: "bottom bottom", scrub: 1.2 }
+            });
+
+            tl.to(camera.position, { z: targetZ, ease: "none" });
+
+            const panels = gsap.utils.toArray('.ui-panel');
+            panels.forEach((panel, i) => {
+                if(i === 0) return; 
+                ScrollTrigger.create({
+                    trigger: panel, start: "top 85%", end: "bottom 15%", toggleActions: "play reverse play reverse", 
+                    animation: gsap.fromTo(panel, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" })
+                });
+            });
+        }
+        
+        // Wait for DOM to load, then instantly start the scroll triggers (since preloader is gone)
+        document.addEventListener("DOMContentLoaded", () => {
+            ScrollTrigger.refresh(); 
+            initScrollAnimations();
+        });
+    </script>
+</body>
+</html>
