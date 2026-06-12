@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Authentication | E-Summit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg-color: #030101; --panel-bg: rgba(12, 3, 3, 0.85);
+            --brand-red: #e62b2b; --brand-yellow: #fca311; --text-white: #f5f5f5; 
+        }
+        body { 
+            background-color: var(--bg-color); color: var(--text-white); 
+            font-family: 'Montserrat', sans-serif; margin: 0; 
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            background-image: linear-gradient(rgba(230, 43, 43, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(230, 43, 43, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .login-panel {
+            background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.05); 
+            border-top: 4px solid var(--brand-red); padding: 40px; border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8); width: 100%; max-width: 400px;
+            text-align: center;
+        }
+        .login-panel h2 { margin-top: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; color: var(--brand-red); margin-bottom: 30px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+        .input-group input { 
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.5); 
+            border: 1px solid rgba(255,255,255,0.2); color: white; 
+            border-radius: 4px; font-family: 'Montserrat', sans-serif; box-sizing: border-box;
+        }
+        .input-group input:focus { outline: none; border-color: var(--brand-yellow); }
+        .btn-login {
+            width: 100%; padding: 12px; background: rgba(230, 43, 43, 0.1); 
+            color: var(--brand-red); border: 1px solid var(--brand-red); 
+            border-radius: 4px; font-weight: 700; text-transform: uppercase; 
+            cursor: pointer; transition: all 0.3s; margin-top: 10px;
+        }
+        .btn-login:hover { background: var(--brand-red); color: #fff; box-shadow: 0 0 15px rgba(230,43,43,0.3); }
+        #error-msg { color: var(--brand-yellow); font-size: 0.85rem; margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="login-panel">
+        <h2><i class="fa-solid fa-lock"></i> System Override</h2>
+        <form id="admin-login-form">
+            <div class="input-group">
+                <label>Admin ID (Name)</label>
+                <input type="text" id="admin-name" required placeholder="Enter designation...">
+            </div>
+            <div class="input-group">
+                <label>Clearance Code (Password)</label>
+                <input type="password" id="admin-pass" required placeholder="Enter password...">
+            </div>
+            <button type="submit" class="btn-login">Initiate Override</button>
+            <div id="error-msg">Authentication failed. Access denied.</div>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api";
+
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('admin-name').value;
+            const password = document.getElementById('admin-pass').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            try {
+                // Sending credentials to your backend
+                const res = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, password })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Save the token and redirect to dashboard
+                    localStorage.setItem('esummit_token', data.token);
+                    window.location.href = "admin.html";
+                } else {
+                    errorMsg.innerText = data.error || "Authentication failed. Access denied.";
+                    errorMsg.style.display = "block";
+                }
+            } catch (err) {
+                errorMsg.innerText = "Mainframe connection offline.";
+                errorMsg.style.display = "block";
+            }
+        });
+    </script>
+</body>
+</html>

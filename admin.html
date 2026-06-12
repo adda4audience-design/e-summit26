@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mainframe Command | E-Summit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <style>
+        :root { 
+            --bg-color: #030101; --panel-bg: rgba(12, 3, 3, 0.85);
+            --brand-red: #e62b2b; --brand-yellow: #fca311; --text-white: #f5f5f5; 
+        }
+        
+        body { 
+            background-color: var(--bg-color); color: var(--text-white); 
+            font-family: 'Montserrat', sans-serif; margin: 0; padding: 30px;
+            background-image: linear-gradient(rgba(230, 43, 43, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(230, 43, 43, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .dashboard-container { max-width: 1400px; margin: 0 auto; }
+        
+        /* --- HEADER & NAVIGATION --- */
+        .admin-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 20px; margin-bottom: 30px; 
+        }
+        .admin-header h1 { color: var(--brand-red); text-transform: uppercase; margin: 0; font-size: 1.8rem; letter-spacing: 2px; }
+        
+        .tab-menu { display: flex; gap: 15px; }
+        .tab-btn { 
+            background: transparent; color: #888; border: 1px solid rgba(255,255,255,0.1); 
+            padding: 10px 20px; font-weight: 700; text-transform: uppercase; border-radius: 4px; 
+            cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; letter-spacing: 1px;
+        }
+        .tab-btn:hover { color: var(--brand-yellow); border-color: var(--brand-yellow); }
+        .tab-btn.active { background: var(--brand-red); color: white; border-color: var(--brand-red); box-shadow: 0 0 15px rgba(230,43,43,0.3); }
+
+        /* --- STATS GRID --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { 
+            background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid var(--brand-yellow);
+            padding: 20px; border-radius: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .stat-card label { display: block; font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+        .stat-card .num { font-size: 2rem; font-weight: 800; color: var(--text-white); }
+        
+        /* --- ANALYTICS/CHARTS LAYOUT --- */
+        .analytics-section { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 40px; }
+        .chart-box { background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; min-height: 320px;}
+        .chart-box h3 { margin-top: 0; text-transform: uppercase; font-size: 0.9rem; color: var(--brand-yellow); letter-spacing: 1px; margin-bottom: 20px;}
+
+        /* --- DATA TABLES & PANELS --- */
+        .data-panel { 
+            background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.05); 
+            border-top: 4px solid var(--brand-red); padding: 30px; border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8); display: none;
+        }
+        .data-panel.active { display: block; }
+        .data-panel h2 { margin-top: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        th { color: #888; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; font-weight: 700; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .utr-text { font-family: monospace; color: var(--brand-yellow); font-size: 1.05rem; letter-spacing: 1px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .badge-success { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
+        .badge-pending { background: rgba(252, 163, 17, 0.15); color: var(--brand-yellow); border: 1px solid var(--brand-yellow); }
+
+        /* --- CONTROL INTERFACES --- */
+        .btn-action {
+            padding: 8px 14px; border: none; border-radius: 4px; font-weight: 700;
+            text-transform: uppercase; cursor: pointer; transition: all 0.2s; font-size: 0.75rem;
+        }
+        .btn-approve { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid #2ecc71; margin-right: 8px; }
+        .btn-approve:hover { background: #2ecc71; color: #000; box-shadow: 0 0 15px rgba(46,204,113,0.3); }
+        .btn-reject { background: rgba(230, 43, 43, 0.1); color: var(--brand-red); border: 1px solid var(--brand-red); }
+        .btn-reject:hover { background: var(--brand-red); color: #fff; box-shadow: 0 0 15px rgba(230,43,43,0.3); }
+        
+        .btn-view { background: rgba(252, 163, 17, 0.1); color: var(--brand-yellow); border: 1px solid var(--brand-yellow); }
+        .btn-view:hover { background: var(--brand-yellow); color: #000; box-shadow: 0 0 15px rgba(252,163,17,0.3); }
+
+        .filters-container { display: flex; gap: 15px; margin-bottom: 20px; }
+        .filters-container input, .filters-container select { 
+            padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); 
+            color: white; border-radius: 4px; font-family: 'Montserrat', sans-serif;
+        }
+
+        .direct-hostel-input { width: 150px; padding: 6px; background: #000; border: 1px solid #333; color: white; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; }
+
+        .empty-state { text-align: center; padding: 40px; color: #666; font-style: italic; }
+
+        /* --- MODAL (AGENT DOSSIER) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: #0a0202; border: 1px solid var(--brand-yellow); padding: 30px; border-radius: 8px; width: 90%; max-width: 650px; max-height: 90vh; overflow-y: auto;}
+        
+        .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .detail-item { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border-left: 3px solid #444; }
+        .detail-item.highlight { border-left-color: var(--brand-yellow); background: rgba(252, 163, 17, 0.05); }
+        .detail-item label { display: block; font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 5px; font-weight: 700;}
+        .detail-item .value { font-size: 1rem; font-weight: 600; word-break: break-all; }
+        
+        .text-success { color: #2ecc71; font-weight: 800; }
+        .text-pending { color: var(--brand-yellow); font-weight: 800; }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .admin-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .tab-menu { flex-wrap: wrap; gap: 10px; }
+            .tab-btn { flex: 1; text-align: center; font-size: 0.75rem; padding: 8px; }
+            
+            .analytics-section { grid-template-columns: 1fr; gap: 20px; }
+            .filters-container { flex-direction: column; }
+            
+            /* Force tables to scroll horizontally instead of squishing */
+            .data-panel { padding: 15px; overflow-x: auto; }
+            table { min-width: 600px; } 
+            
+            .dossier-grid { grid-template-columns: 1fr; }
+            .modal-content { padding: 20px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- HEADER BLOCK -->
+        <div class="admin-header">
+            <h1><i class="fa-solid fa-satellite-dish"></i> Mainframe Command</h1>
+            <div class="tab-menu">
+                <button class="tab-btn active" onclick="switchTab('analytics')">Analytics</button>
+                <button class="tab-btn" onclick="switchTab('utr-queue')">UTR Queue (<span id="queue-badge-count">0</span>)</button>
+                <button class="tab-btn" onclick="switchTab('all-users')">Registered Agents</button>
+                <button class="tab-btn" onclick="systemLogout()" style="color: var(--brand-red); border-color: var(--brand-red);"><i class="fa-solid fa-power-off"></i> Disconnect</button>
+            </div>
+        </div>
+
+        <!-- TAB 1: ANALYTICS HUB -->
+        <div id="tab-analytics" class="data-panel active" style="border-top-color: var(--brand-yellow);">
+            <h2>E-Summit Operational Overview</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card"><label>Total Registrations</label><div class="num" id="stat-total">--</div></div>
+                <div class="stat-card" style="border-left-color: #2ecc71;"><label>Verified Revenue</label><div class="num" id="stat-revenue">₹--</div></div>
+                <div class="stat-card" style="border-left-color: #3498db;"><label>UIET Ingress</label><div class="num" id="stat-uiet">--</div></div>
+                <div class="stat-card" style="border-left-color: #9b59b6;"><label>Hostel Bookings</label><div class="num" id="stat-hostels">--</div></div>
+            </div>
+
+            <div class="analytics-section">
+                <div class="chart-box">
+                    <h3>Clearance Matrix</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>Demographics</h3>
+                    <canvas id="demographicChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: UTR VERIFICATION QUEUE -->
+        <div id="tab-utr-queue" class="data-panel">
+            <h2>Financial Verification Backlog</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Delegate</th>
+                        <th>Institution & Meta</th>
+                        <th>Amount Due</th>
+                        <th>UTR Code</th>
+                        <th>Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="utr-table-body">
+                    <!-- Dynamic injection -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TAB 3: ALL REGISTERED USERS -->
+        <div id="tab-all-users" class="data-panel" style="border-top-color: #3498db;">
+            <h2>Global Agent Database</h2>
+            
+            <div class="filters-container">
+                <input type="text" id="filter-search" placeholder="Search by name, email or Pass ID..." oninput="applyUserFilters()" style="flex: 1;">
+                <select id="filter-status" onchange="applyUserFilters()">
+                    <option value="all">All Clearances</option>
+                    <option value="Success">Verified Passes</option>
+                    <option value="Pending">Pending Validation</option>
+                </select>
+                <select id="filter-type" onchange="applyUserFilters()">
+                    <option value="all">All Origins</option>
+                    <option value="yes">UIET Students</option>
+                    <option value="no">External Agents</option>
+                </select>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent Identity</th>
+                        <th>Clearance Vector</th>
+                        <th>Institution / Matrix</th>
+                        <th>Hostel Mapping</th>
+                        <th>Pass ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="all-users-table-body">
+                    <!-- Dynamic injection -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- FULL DETAILS MODAL (DOSSIER) -->
+    <div class="modal-overlay" id="details-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;"><i class="fa-solid fa-id-card"></i> Agent Dossier</h2>
+                <button class="btn-action btn-reject" onclick="closeDetailsModal()" style="margin: 0; padding: 6px 12px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="dossier-grid" id="details-modal-content">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api";
+        const token = localStorage.getItem('esummit_token');
+        let socket;
+
+        // NEW: Fail-safe telemetry connection
+        try {
+            if (typeof io !== 'undefined') {
+                // Initialize socket only if library is available
+                socket = io("http://localhost:5000");
+
+                // Listen for the backend ping
+                socket.on('mainframe_update', () => {
+                    console.log("Telemetry received. Refreshing matrix...");
+                    
+                    // Silently refresh data in the background without reloading the page
+                    loadAnalyticsSummary();
+                    loadPendingQueue();
+                    loadAllUsers();
+                    
+                    // Optional: Re-apply filters so the screen doesn't jump if you were searching
+                    setTimeout(applyUserFilters, 500);
+                });
+            } else {
+                console.warn("Live telemetry offline. Switching to manual refresh mode.");
+            }
+        } catch (e) {
+            console.error("Socket initialization bypassed.", e);
+        }
+        function systemLogout() {
+            localStorage.removeItem('esummit_token');
+            window.location.href = "admin-login.html";
+        }
+        let demographicChart, revenueChart;
+        let allUsersGlobal = []; 
+
+        if (!token) window.location.href = "admin-login.html";
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.data-panel').forEach(panel => panel.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            if(tabId === 'utr-queue') loadPendingQueue();
+            if(tabId === 'all-users') loadAllUsers();
+            if(tabId === 'analytics') loadAnalyticsSummary();
+        }
+
+        function toggleHostelInput(utr) {
+            const checkbox = document.getElementById(`alloc-${utr}`);
+            const input = document.getElementById(`hostel-name-${utr}`);
+            if(checkbox && input) input.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+    async function toggleCheckIn(userId, newStatus) {
+            const actionText = newStatus ? 'FORCE CHECK-IN' : 'REVOKE ACCESS';
+            if(!confirm(`Mainframe Warning: Are you sure you want to ${actionText} for this agent?`)) return;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/admin/toggle-checkin`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ userId, checkInStatus: newStatus })
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    // Update local array memory
+                    const userIndex = allUsersGlobal.findIndex(u => u._id === userId);
+                    if(userIndex !== -1) allUsersGlobal[userIndex].checkInStatus = newStatus;
+                    
+                    // Refresh the open modal and the background table
+                    viewUserDetails(userId);
+                    applyUserFilters(); 
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert("Mainframe override failed.");
+            }
+        }
+    
+        // --- DASHBOARD ANALYTICS ---
+     async function loadAnalyticsSummary() {
+            try {
+                const res = await fetch(`${API_URL}/payments/admin/pending`, { headers: { 'Authorization': `Bearer ${token}` } });
+                
+                // NEW: Security Bounce Check
+                if (res.status === 401 || res.status === 403) {
+                    console.warn("Invalid clearance. Terminating session.");
+                    systemLogout();
+                    return;
+                }
+
+                const queueData = await res.json();
+                
+                const usersRes = await fetch(`${API_URL}/auth/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const usersData = await usersRes.json();
+                
+                if(!usersData.success) return;
+                const users = usersData.data;
+
+                document.getElementById('queue-badge-count').innerText = queueData.count || 0;
+
+                const totalCount = users.length;
+                const uietCount = users.filter(u => u.delegateStatus === 'yes').length;
+                const hostelCount = users.filter(u => u.hostelAllocated).length;
+                
+                let calculatedRevenue = 0;
+                let successPayments = 0;
+                let pendingPayments = 0;
+
+                users.forEach(u => {
+                    if(u.paymentStatus === 'Success') {
+                        successPayments++;
+                        if(u.delegateStatus === 'no') calculatedRevenue += (u.needHostel ? 1000 : 300);
+                    } else {
+                        pendingPayments++;
+                    }
+                });
+
+                document.getElementById('stat-total').innerText = totalCount;
+                document.getElementById('stat-revenue').innerText = `₹${calculatedRevenue}`;
+                document.getElementById('stat-uiet').innerText = uietCount;
+                document.getElementById('stat-hostels').innerText = hostelCount;
+
+                renderCharts(uietCount, totalCount - uietCount, successPayments, pendingPayments);
+            } catch(err) { console.error("Analytics fetch failed:", err); }
+        }
+
+        function renderCharts(uiet, external, success, pending) {
+            const ctx1 = document.getElementById('demographicChart').getContext('2d');
+            const ctx2 = document.getElementById('revenueChart').getContext('2d');
+
+            if(demographicChart) demographicChart.destroy();
+            if(revenueChart) revenueChart.destroy();
+
+            Chart.defaults.color = '#888';
+            Chart.defaults.font.family = 'Montserrat';
+
+            demographicChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['UIET KUK', 'External'],
+                    datasets: [{
+                        data: [uiet, external],
+                        backgroundColor: ['#e62b2b', '#fca311'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+            });
+
+            revenueChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Success Clearances', 'Pending Operations'],
+                    datasets: [{
+                        label: 'Agent Distribution Count',
+                        data: [success, pending],
+                        backgroundColor: ['rgba(46, 204, 113, 0.2)', 'rgba(252, 163, 17, 0.2)'],
+                        borderColor: ['#2ecc71', '#fca311'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { 
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } },
+                    plugins: { legend: { display: false } },
+                    responsive: true
+                }
+            });
+        }
+
+        // --- UTR QUEUE MANAGEMENT ---
+        async function loadPendingQueue() {
+            try {
+                const res = await fetch(`${API_URL}/payments/admin/pending`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                const tbody = document.getElementById('utr-table-body');
+
+                if (data.count === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No transaction backlog found in memory grid.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.data.map(order => `
+                    <tr id="row-${order.utrNumber}">
+                        <td><strong>${order.userId?.fullName || 'Terminated Context'}</strong><br><span style="font-size:0.8rem; color:#888;">${order.userId?.email || '--'}</span></td>
+                        <td>${order.userId?.collegeName || 'N/A'}<br><span style="font-size:0.8rem; color:#888;">Gender: ${order.userId?.gender || 'N/A'}</span></td>
+                        <td style="font-weight:700;">₹${order.amountCalculated}</td>
+                        <td class="utr-text">${order.utrNumber}</td>
+                        <td>
+                            ${order.userId?.needHostel ? `
+                                <label style="display:block; font-size:0.75rem; margin-bottom:5px;">
+                                    <input type="checkbox" id="alloc-${order.utrNumber}" onchange="toggleHostelInput('${order.utrNumber}')"> Allocate Hostel
+                                </label>
+                                <input type="text" id="hostel-name-${order.utrNumber}" placeholder="Hostel Destination" style="display:none; width:100%; padding:6px; margin-bottom:8px; background:#000; border:1px solid #333; color:white; border-radius:4px; font-size:0.8rem;">
+                            ` : '' }
+                            <button class="btn-action btn-approve" onclick="processUtr('${order.utrNumber}', 'approve')">Verify</button>
+                            <button class="btn-action btn-reject" onclick="processUtr('${order.utrNumber}', 'reject')">Reject</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(err) { console.error(err); }
+        }
+
+        async function processUtr(utrNumber, action) {
+            if(!confirm(`Commit ${action.toUpperCase()} configuration for code ${utrNumber}?`)) return;
+
+            let allocateHostel = false;
+            let allocatedHostelName = "";
+            const allocCheckbox = document.getElementById(`alloc-${utrNumber}`);
+            
+            if (allocCheckbox && allocCheckbox.checked) {
+                allocateHostel = true;
+                const nameInput = document.getElementById(`hostel-name-${utrNumber}`);
+                if (nameInput) allocatedHostelName = nameInput.value;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/payments/admin/verify-utr`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ utrNumber, action, allocateHostel, allocatedHostelName })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById(`row-${utrNumber}`).style.opacity = '0.2';
+                    setTimeout(() => loadPendingQueue(), 400);
+                } else { alert(data.error); }
+            } catch (err) { alert("Mainframe call error."); }
+        }
+
+        // --- GLOBAL USER DATABASE & DIRECT HOSTEL ALLOCATION ---
+        async function loadAllUsers() {
+            try {
+                const res = await fetch(`${API_URL}/auth/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                
+                if (data.success) {
+                    allUsersGlobal = data.data; 
+                    renderAllUsersTable(allUsersGlobal);
+                }
+            } catch(err) { console.error(err); }
+        }
+
+        function renderAllUsersTable(users) {
+            const tbody = document.getElementById('all-users-table-body');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No agents match the current filter parameters.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => {
+                let hostelHtml = '<span style="color:#555;">Not Requested</span>';
+                
+                if (u.needHostel) {
+                    if (u.hostelAllocated && u.allocatedHostelName) {
+                        hostelHtml = `
+                            <div id="hostel-display-${u._id}" style="display:flex; align-items:center;">
+                                <span style="color:#2ecc71; font-weight:600;"><i class="fa-solid fa-hotel"></i> ${u.allocatedHostelName}</span>
+                                <button class="btn-action" style="padding: 4px 8px; margin-left: 10px; font-size: 0.7rem; background:transparent; color:#888; border:1px solid rgba(255,255,255,0.2);" onclick="toggleHostelEdit('${u._id}')" title="Edit Hostel"><i class="fa-solid fa-pen"></i></button>
+                            </div>
+                            <div id="hostel-edit-${u._id}" style="display:none; align-items:center;">
+                                <input type="text" id="direct-hostel-${u._id}" class="direct-hostel-input" placeholder="Hostel Name" value="${u.allocatedHostelName}">
+                                <button class="btn-action" style="padding: 6px 10px; margin-left: 5px; background:rgba(255,255,255,0.1); color:white; border-color:transparent;" onclick="directAllocateHostel('${u._id}')">Save</button>
+                                <button class="btn-action" style="padding: 6px 10px; margin-left: 5px; background:transparent; color:#888; border:none;" onclick="cancelHostelEdit('${u._id}')"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        `;
+                    } else {
+                        hostelHtml = `
+                            <div id="hostel-edit-${u._id}" style="display:flex; align-items:center;">
+                                <input type="text" id="direct-hostel-${u._id}" class="direct-hostel-input" placeholder="Assign Hostel..." value="${u.allocatedHostelName || ''}">
+                                <button class="btn-action" style="padding: 6px 10px; margin-left: 5px; background:var(--brand-yellow); color:#000; border-color:transparent;" onclick="directAllocateHostel('${u._id}')">Save</button>
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${u.fullName}</strong><br><span style="font-size:0.8rem; color:#888;">${u.email}</span></td>
+                        <td><span class="badge ${u.paymentStatus === 'Success' ? 'badge-success' : 'badge-pending'}">${u.paymentStatus}</span></td>
+                        <td>${u.collegeName}<br><span style="font-size:0.8rem; color:#666;">${u.delegateStatus === 'yes' ? `UIET: ${u.branch} (${u.year} Year)` : `Comms: ${u.phoneNumber}`}</span></td>
+                        <td>${hostelHtml}</td>
+                        <td style="font-family:monospace; font-weight:700; color:var(--brand-yellow);">${u.ticketId || '--'}</td>
+                        <td><button class="btn-action btn-view" onclick="viewUserDetails('${u._id}')"><i class="fa-solid fa-eye"></i> View</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // --- HOSTEL EDIT TOGGLES ---
+        function toggleHostelEdit(userId) {
+            document.getElementById(`hostel-display-${userId}`).style.display = 'none';
+            document.getElementById(`hostel-edit-${userId}`).style.display = 'flex';
+        }
+        function cancelHostelEdit(userId) {
+            document.getElementById(`hostel-edit-${userId}`).style.display = 'none';
+            document.getElementById(`hostel-display-${userId}`).style.display = 'flex';
+        }
+
+        function applyUserFilters() {
+            const searchQuery = document.getElementById('filter-search').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const typeFilter = document.getElementById('filter-type').value;
+
+            const filteredData = allUsersGlobal.filter(user => {
+                const matchesSearch = user.fullName.toLowerCase().includes(searchQuery) || 
+                                      user.email.toLowerCase().includes(searchQuery) || 
+                                      (user.ticketId && user.ticketId.toLowerCase().includes(searchQuery));
+                
+                const matchesStatus = statusFilter === 'all' || user.paymentStatus === statusFilter;
+                const matchesType = typeFilter === 'all' || user.delegateStatus === typeFilter;
+
+                return matchesSearch && matchesStatus && matchesType;
+            });
+
+            renderAllUsersTable(filteredData);
+        }
+
+        async function directAllocateHostel(userId) {
+            const nameInput = document.getElementById(`direct-hostel-${userId}`);
+            const allocatedHostelName = nameInput ? nameInput.value : '';
+
+            try {
+                const res = await fetch(`${API_URL}/auth/admin/allocate-hostel`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ userId, hostelAllocated: true, allocatedHostelName })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    loadAllUsers(); 
+                } else { alert(data.error); }
+            } catch (err) { alert("Operation failed."); }
+        }
+
+        // --- DOSSIER MODAL LOGIC ---
+        function viewUserDetails(userId) {
+            const user = allUsersGlobal.find(u => u._id === userId);
+            if(!user) return;
+
+            const content = document.getElementById('details-modal-content');
+            
+            let specificHtml = '';
+            if(user.delegateStatus === 'yes') {
+                specificHtml = `
+                    <div class="detail-item"><label>Branch:</label> <div class="value">${user.branch || 'N/A'}</div></div>
+                    <div class="detail-item"><label>Year:</label> <div class="value">${user.year || 'N/A'}</div></div>
+                    <div class="detail-item"><label>Roll Number:</label> <div class="value">${user.rollNo || 'N/A'}</div></div>
+                `;
+            } else {
+                specificHtml = `
+                    <div class="detail-item"><label>Gender:</label> <div class="value">${user.gender || 'N/A'}</div></div>
+                    <div class="detail-item"><label>City:</label> <div class="value">${user.city || 'N/A'}</div></div>
+                    <div class="detail-item"><label>State:</label> <div class="value">${user.state || 'N/A'}</div></div>
+                `;
+            }
+
+            content.innerHTML = `
+                <div class="detail-item highlight" style="grid-column: span 2;">
+                    <label>Agent Identity:</label> 
+                    <div class="value" style="font-size: 1.3rem; color: var(--brand-yellow);">${user.fullName}</div>
+                </div>
+                <div class="detail-item"><label>Email:</label> <div class="value">${user.email}</div></div>
+                <div class="detail-item"><label>Communications:</label> <div class="value">${user.phoneNumber}</div></div>
+                
+                <div class="detail-item"><label>Delegate Type:</label> <div class="value">${user.delegateStatus === 'yes' ? 'Internal (UIET Student)' : 'External Agent'}</div></div>
+                <div class="detail-item"><label>Institution:</label> <div class="value">${user.collegeName}</div></div>
+                
+                ${specificHtml}
+                
+                <div class="detail-item"><label>Hostel Request:</label> <div class="value">${user.needHostel ? 'YES' : 'NO'}</div></div>
+                <div class="detail-item"><label>Hostel Assigned:</label> <div class="value">${user.hostelAllocated ? user.allocatedHostelName || 'YES' : 'PENDING / NO'}</div></div>
+                
+                <div class="detail-item"><label>Clearance Status:</label> <div class="value ${user.paymentStatus === 'Success' ? 'text-success' : 'text-pending'}">${user.paymentStatus}</div></div>
+                <div class="detail-item"><label>Pass Identification:</label> <div class="value" style="font-family: monospace;">${user.ticketId || 'LOCK ENGAGED'}</div></div>
+                
+                <div class="detail-item" style="display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+        <label>Gate Scanner Status:</label> 
+        <div class="value">${user.checkInStatus ? '<span style="color:#2ecc71;">VERIFIED INGRESS</span>' : 'AWAITING SCAN'}</div>
+    </div>
+    <button class="btn-action ${user.checkInStatus ? 'btn-reject' : 'btn-approve'}" 
+            style="margin-top: 12px; padding: 8px 12px; width: fit-content;" 
+            onclick="toggleCheckIn('${user._id}', ${!user.checkInStatus})">
+        ${user.checkInStatus ? '<i class="fa-solid fa-rotate-left"></i> Revoke Access' : '<i class="fa-solid fa-check-double"></i> Force Check-In'}
+    </button>
+</div>
+                <div class="detail-item"><label>Profile Created:</label> <div class="value">${new Date(user.createdAt).toLocaleString()}</div></div>
+            `;
+
+            document.getElementById('details-modal').style.display = 'flex';
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('details-modal').style.display = 'none';
+        }
+
+        // Initialize Analytics view on boot
+        loadAnalyticsSummary();
+    </script>
+</body>
+</html>
