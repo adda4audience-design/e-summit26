@@ -5,43 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UIET KUK E-Summit | The Shift</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&family=Impact&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
+        /* --- GLOBAL VARIABLES & RESET --- */
         :root {
             --bg-color: #030101; 
             --brand-red: #e62b2b;
             --brand-yellow: #fca311;
             --text-white: #f5f5f5;
+            --cyber-cyan: #00ffff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-white);
             width: 100%;
             overflow-x: hidden; 
-            margin: 0;
-            padding: 0;
         }
 
-        h1 { 
-            text-shadow: 
-                0 0 30px rgba(230, 43, 43, 0.5), 
-                0 4px 10px rgba(0,0,0,1),
-                0 10px 30px rgba(0,0,0,0.9) !important; 
-        }
-
+        h1 { text-shadow: 0 0 30px rgba(230, 43, 43, 0.5), 0 4px 10px rgba(0,0,0,1), 0 10px 30px rgba(0,0,0,0.9) !important; }
         h2, h3 { text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
         p, span, li { text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
 
@@ -96,10 +88,7 @@
         @media (max-width: 900px) { .desktop-nav { display: none; } .burger { display: flex; } }
 
         /* --- 3D CANVAS & LAYOUT --- */
-        #bg-canvas { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
-            z-index: 0; pointer-events: none; display: block; 
-        }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none; display: block; }
         
         .scroll-container { position: relative; z-index: 10; width: 100%; }
         
@@ -131,7 +120,8 @@
         @keyframes pulseGrid { 100% { opacity: 0.3; } }
         @media (max-width: 1024px) { .hero-corner { display: none; } }
 
-        /* --- HERO TYPOGRAPHY & LOOPING HORIZONTAL STRIKETHROUGHS --- */
+        /* --- HERO SECTION --- */
+        #hero .ui-panel { display: flex; flex-direction: column; align-items: center; }
         .hero-top { color: var(--text-white); font-weight: 600; letter-spacing: 12px; font-size: 1.2rem; margin-bottom: 5px; text-transform: uppercase; }
         .hero-main-wrapper { position: relative; display: inline-block; margin-bottom: 10px; max-width: 100%; }
         .hero-main { font-size: clamp(3rem, 10vw, 10rem); font-weight: 900; line-height: 1.1; margin: 0; position: relative; z-index: 2; text-transform: uppercase; letter-spacing: 2px; white-space: nowrap;}
@@ -154,7 +144,7 @@
         .s4 { --angle: -30deg; width: 22%; background: var(--brand-red); top: 22%; right: -6%; transform-origin: right center; animation-delay: 0.8s; box-shadow: 0 0 15px var(--brand-red); }
 
         .hero-bottom-container {
-            display: flex; gap: 15px; justify-content: center; margin-bottom: 40px;
+            display: flex; gap: 15px; justify-content: center; margin-bottom: 15px;
             font-size: clamp(1rem, 3vw, 1.8rem); color: var(--text-white); font-weight: 800; text-transform: uppercase;
         }
         
@@ -172,62 +162,112 @@
             15%, 70% { max-width: 250px; opacity: 1; transform: translateX(0); padding-left: 5px; }
         }
 
-        .hero-buttons { display: flex; gap: 20px; justify-content: center; margin-bottom: 35px; }
+        /* --- HERO CIRCLE LOGOS --- */
+        .hero-logos {
+            display: flex; gap: 40px; justify-content: center; margin-bottom: 30px;
+        }
+        .hero-logos .circle {
+            width: 70px; height: 70px; /* Slightly bigger to accommodate images */
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s;
+            overflow: hidden; /* CRITICAL: Prevents images from breaking out of the circle */
+        }
+        .hero-logos .circle:hover {
+            border-color: var(--brand-yellow);
+            box-shadow: 0 0 15px rgba(252, 163, 17, 0.5);
+            transform: translateY(-2px);
+        }
+        /* Forces the image to fit perfectly inside the circle */
+        .hero-logos .circle img {
+            width: 130%;
+            height: 130%;
+            object-fit: contain; /* Ensures the logo isn't cropped. Use 'cover' if you want it to fill completely */
+            padding: 8px; /* Adds a little breathing room inside the circle */
+        }
+
+        /* --- BUTTONS --- */
+        .hero-buttons { display: flex; gap: 20px; justify-content: center; margin-bottom: 35px; width: 100%; }
+        
         .btn-primary-large {
-            padding: 15px 45px; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; 
+            padding: 15px 75px; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; 
             text-decoration: none; border-radius: 4px; background: linear-gradient(45deg, var(--brand-red), var(--brand-yellow));
-            color: var(--bg-color); border: none; transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(230, 43, 43, 0.4);
+            color: var(--bg-color); border: none; transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(230, 43, 43, 0.4); text-align: center;
         }
         .btn-primary-large:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(252, 163, 17, 0.6); }
 
-        .btn-secondary-large { padding: 15px 45px; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; border-radius: 4px; transition: all 0.3s ease; }
-        .btn-secondary-large { background: transparent; color: var(--text-white); border: 2px solid var(--text-white); }
-        .btn-secondary-large:hover { background: var(--text-white); color: var(--bg-color); box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .btn-secondary-large { 
+            padding: 15px 75px; font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; border-radius: 4px; transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9); color: #000000; border: 2px solid #ffffff; text-align: center;
+        }
+        .btn-secondary-large:hover { 
+            background: #ffffff; border-color: #ffffff; box-shadow: 0 0 20px rgba(255,255,255,0.7); transform: translateY(-3px);
+        }
 
-        /* --- HERO TIMER --- */
+        /* --- CYBERPUNK GLITCH TIMER --- */
         .hero-timer-wrapper {
-            background: rgba(12, 3, 3, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-top: 2px solid var(--brand-yellow);
-            border-radius: 8px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            width: fit-content; margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            animation: pulseTimer 3s infinite alternate;
-            padding: 15px 35px;
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            position: relative;
+            margin: 0 auto 40px auto;
+            width: fit-content;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            background: transparent;
         }
 
-        .timer-title {
-            color: var(--brand-red);
-            font-family: monospace; /* Mechanical/Sci-fi font look */
-            font-size: 0.9rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 0 0 8px rgba(230, 43, 43, 0.6);
-            margin-bottom: 5px;
+        .hero-timer { display: flex; justify-content: center; align-items: center; gap: 15px; }
+
+        .time-block { 
+            background: rgba(10, 5, 5, 0.85);
+            border: 1px solid var(--brand-red);
+            border-top: 3px solid var(--brand-yellow);
+            padding: 15px 25px;
+            min-width: 100px;
+            display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 0 15px rgba(230, 43, 43, 0.2), inset 0 0 10px rgba(252, 163, 17, 0.1);
+            clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%);
+            position: relative;
         }
 
-        .hero-timer {
-            display: flex; justify-content: center; align-items: center; gap: 15px;
+        .time-block::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 15px; height: 15px; 
+            border-top: 2px solid var(--brand-yellow); border-left: 2px solid var(--brand-yellow);
         }
-        
-        @keyframes pulseTimer { 100% { box-shadow: 0 10px 40px rgba(252, 163, 17, 0.15); border-top-color: var(--brand-red); } }
 
-        .time-block { display: flex; flex-direction: column; align-items: center; min-width: 75px; }
         .time-value {
-            font-size: 2.8rem; font-weight: 900; color: var(--brand-yellow);
-            font-variant-numeric: tabular-nums; line-height: 1; text-shadow: 0 0 15px rgba(252, 163, 17, 0.5);
+            font-size: 3.8rem; 
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            line-height: 1; 
+            font-weight: 900;
+            position: relative;
+            text-shadow: 2px 0 var(--brand-red), -2px 0 var(--cyber-cyan);
+            animation: glitchText 3s infinite;
         }
-        .time-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #ccc; margin-top: 6px; font-weight: 600; }
+
+        @keyframes glitchText {
+            0%, 100% { text-shadow: 2px 0 var(--brand-red), -2px 0 var(--cyber-cyan); transform: translate(0); }
+            20% { text-shadow: -2px 0 var(--brand-red), 2px 0 var(--cyber-cyan); transform: translate(-2px, 1px); }
+            40% { text-shadow: 2px 0 var(--brand-red), -2px 0 var(--cyber-cyan); transform: translate(2px, -1px); }
+            60% { text-shadow: -2px 0 var(--brand-red), 2px 0 var(--cyber-cyan); transform: translate(-1px, -1px); }
+            80% { text-shadow: 2px 0 var(--brand-red), -2px 0 var(--cyber-cyan); transform: translate(1px, 1px); }
+            85% { text-shadow: 4px 0 var(--brand-red), -4px 0 var(--cyber-cyan); transform: skew(-5deg); }
+        }
+
+        .time-label { 
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--brand-yellow); margin-top: 8px; font-weight: 600; 
+        }
         
-        .time-separator { font-size: 2.2rem; color: var(--brand-red); font-weight: 800; margin-top: -18px; animation: blink 1s step-end infinite; text-shadow: 0 0 10px rgba(230,43,43,0.5); }
-        @keyframes blink { 50% { opacity: 0; } }
+        .time-separator { 
+            font-size: 3rem; color: var(--brand-yellow); font-weight: 900; margin-top: -25px; 
+            text-shadow: 0 0 15px var(--brand-yellow); 
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
         h2 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; color: var(--brand-yellow); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; text-align: left;}
         .subtitle { font-size: 1.1rem; line-height: 1.6; color: #e0e0e0; margin-bottom: 30px; font-weight: 400; text-align: left; max-width: 800px; }
 
-        /* --- ABOUT GRID & WHITISH GLOW --- */
+        /* --- ABOUT SECTION --- */
         #about .ui-panel { max-width: 1200px; }
         .about-layout { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 50px; align-items: center; text-align: left; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
@@ -239,7 +279,6 @@
         .stat-card h3 { color: var(--brand-yellow); font-size: 2.4rem; margin-bottom: 3px; }
         .stat-card p { color: #aaa; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;}
 
-        /* B&W Collage with Ambient White Glow */
         .collage-container { position: relative; width: 100%; height: 460px; display: flex; justify-content: center; align-items: center; }
         
         .collage-container::before {
@@ -262,15 +301,13 @@
         .collage-2 { top: 20%; right: 5%; z-index: 3; transform: rotate(5deg); animation: floatSlow 8s ease-in-out infinite reverse; }
         .collage-3 { bottom: -5%; left: 25%; z-index: 1; transform: rotate(-2deg); animation: floatSlow 9s ease-in-out infinite 0.5s; }
         
-        .collage-container:hover .collage-img { 
-            filter: grayscale(0%) contrast(1); border-color: var(--brand-red); 
-            box-shadow: 0 20px 45px rgba(230, 43, 43, 0.25); animation-play-state: paused; 
-        }
+        .collage-container:hover .collage-img { filter: grayscale(0%) contrast(1); border-color: var(--brand-red); box-shadow: 0 20px 45px rgba(230, 43, 43, 0.25); animation-play-state: paused; }
         .collage-container:hover .collage-1 { transform: translate(-20px, -15px) rotate(-11deg) scale(1.04); z-index: 10;}
         .collage-container:hover .collage-2 { transform: translate(20px, 10px) rotate(9deg) scale(1.04); z-index: 10;}
         .collage-container:hover .collage-3 { transform: translate(-10px, 20px) rotate(-4deg) scale(1.04); z-index: 10;}
         @keyframes floatSlow { 50% { transform: translateY(-12px) rotate(inherit); } }
 
+        /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 960px) {
             .about-layout { grid-template-columns: 1fr; gap: 40px; text-align: center; }
             #about h2, .subtitle { text-align: center; margin-left: auto; margin-right: auto; }
@@ -279,48 +316,56 @@
             .collage-2 { right: 10%; }
         }
 
-        /* --- MOBILE TWEAKS --- */
         @media (max-width: 768px) {
+            .collage-container::before { opacity: 0; transition: opacity 0.8s ease; }
+            .collage-container.show-glow::before { opacity: 1; }
+            
             section { min-height: auto; padding: 60px 5% 40px 5%; }
             
-            #hero { 
-                min-height: 85vh; 
-                padding-top: 25vh; 
-                padding-bottom: 40px; 
-                display: flex; 
-                align-items: flex-start;
-                justify-content: center;
-            } 
+            #hero { min-height: 100vh; padding-top: 18vh; padding-bottom: 40px; display: flex; align-items: flex-start; justify-content: center; } 
             
             .nav-links li { margin: 10px 0; }
             .nav-links a { font-size: 1.3rem; }
             
-            #hero .ui-panel { padding: 0; width: 100%; max-width: 100vw; position: relative; z-index: 20;}
-            .hero-top { font-size: 0.7rem; letter-spacing: 3px; margin-bottom: 5px; }
-            
-            .hero-main { font-size: 13vw; padding: 5px 0; white-space: nowrap; margin-bottom: 10px; } 
+            #hero .ui-panel { padding: 0; width: 100%; max-width: 100vw; position: relative; z-index: 20; }
+            .hero-top { font-size: 0.7rem; letter-spacing: 5px; margin-bottom: 5px; }
+            .hero-main { font-size: 15.5vw; padding: 0px 0; white-space: nowrap; margin-bottom: 10px; transform: translateX(2px) } 
             .strike-line { display: block; height: 3px; } 
-            
-            .hero-bottom-container { font-size: 0.85rem; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 25px;}
+            .hero-bottom-container { font-size: 0.85rem; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 15px;}
             .word-reveal .hidden-text { letter-spacing: 1px; padding-left: 2px; }
             
-            .hero-buttons { flex-direction: column; gap: 12px; align-items: center; width: 100%; margin-top: 10px; margin-bottom: 20px;}
-            .btn-primary-large, .btn-secondary-large { width: 100%; max-width: 280px; padding: 14px; font-size: 0.95rem;}
-            
-            /* --- EDIT TIMER SIZE/POSITION FOR MOBILE HERE --- */
-            .hero-timer-wrapper { 
-                padding: 12px 20px;
-                /* Add negative margin-top to push it closer to the buttons, e.g., margin-top: -10px; */
-                margin-top: 35px; 
-                /* Use transform: scale() to shrink or grow the whole box. 0.9 makes it 10% smaller. */
-                transform: scale(1.03); 
+            /* Order: Logos -> Buttons -> Timer */
+            .hero-logos { 
+                margin-bottom: 35px; /* INCREASED from 25px to push buttons further down */
+                gap: 15px; 
             }
-            .timer-title { font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 2px;}
-            .hero-timer { gap: 10px; }
-            .time-block { min-width: 50px; }
-            .time-value { font-size: 1.8rem; }
-            .time-label { font-size: 0.6rem; letter-spacing: 1px; margin-top: 3px;}
-            .time-separator { font-size: 1.5rem; margin-top: -12px; }
+            .hero-logos .circle { 
+                width: 50px; height: 50px; /* Fixed mobile size */
+            }
+            .hero-logos .circle img { 
+                padding: 6px; /* Slightly less padding on mobile */
+            }
+
+            .hero-buttons { 
+                flex-direction: column; 
+                gap: 15px; align-items: center; justify-content: center; width: 100%; padding: 0 5%;
+                margin-top: 15px; /* ADDED margin-top to push buttons down even more */
+                margin-bottom: 35px;
+            }
+            .btn-primary-large, .btn-secondary-large { 
+                width: 150%; max-width: 330px; padding: 14px 10px; font-size: 0.95rem;
+            }
+            
+            .hero-timer-wrapper { 
+                margin-top: 0; margin-bottom: 10px; margin-top: 40px;
+                transform: scale(1.165); 
+            }
+            .hero-timer { gap: 6px; }
+            .time-block { min-width: 60px; padding: 8px; clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%); }
+            .time-block::before { width: 8px; height: 8px; }
+            .time-value { font-size: 2rem; }
+            .time-label { font-size: 0.55rem; letter-spacing: 1px; margin-top: 4px;}
+            .time-separator { font-size: 1.8rem; margin-top: -12px; }
 
             .about-layout { display: flex; flex-direction: column-reverse; gap: 20px; text-align: center; }
             #about h2 { margin-bottom: 10px; font-size: 2rem; }
@@ -346,15 +391,14 @@
             .footer-divider .divider-text { white-space: nowrap; font-size: 0.55rem; padding: 0 10px; letter-spacing: 1px; }
             .footer-divider .line { min-width: 20px; height: 1px; display: block; flex-grow: 1;}
 
-            .footer-content { gap: 25px; text-align: left; justify-content: flex-start; margin-bottom: 25px;}
+            .footer-content { gap: 25px; text-align: left; justify-content: flex-start; margin-bottom: 25px; flex-direction: column;}
             .footer-col { width: 100%; display: flex; flex-direction: column; align-items: flex-start; }
             .footer-col h4 { margin-bottom: 10px; font-size: 1.1rem; }
             .footer-col p, .footer-col ul li { margin: 5px 0 0 0; font-size: 0.85rem; line-height: 1.4;} 
             .footer-bottom { text-align: left; padding-top: 15px; }
-            .footer-logo { margin: 0; }
         }
 
-        /* --- PREMIUM SPEAKER CARDS & MISC --- */
+        /* --- SPEAKERS SECTION --- */
         .speaker-card {
             flex: 0 0 280px; scroll-snap-align: start; text-align: center;
             background: linear-gradient(145deg, rgba(20,4,4,0.7), rgba(3,1,1,0.95)); 
@@ -363,26 +407,16 @@
             padding: 20px; border-radius: 12px; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden;
         }
-        .speaker-card:hover { 
-            transform: translateY(-12px); 
-            border-top-color: var(--brand-red); border-color: rgba(230, 43, 43, 0.3); 
-            box-shadow: 0 15px 40px rgba(230, 43, 43, 0.2); 
-        }
+        .speaker-card:hover { transform: translateY(-12px); border-top-color: var(--brand-red); border-color: rgba(230, 43, 43, 0.3); box-shadow: 0 15px 40px rgba(230, 43, 43, 0.2); }
         
-        .speaker-photo { 
-            width: 100%; height: 260px; border-radius: 8px; background: #222; 
-            margin: 0 auto 20px auto; border: 2px solid rgba(255, 255, 255, 0.1); 
-            overflow: hidden; transition: all 0.4s ease; 
-        }
+        .speaker-photo { width: 100%; height: 260px; border-radius: 8px; background: #222; margin: 0 auto 20px auto; border: 2px solid rgba(255, 255, 255, 0.1); overflow: hidden; transition: all 0.4s ease; }
         .speaker-card:hover .speaker-photo { border-color: var(--brand-red); box-shadow: 0 0 20px rgba(230, 43, 43, 0.4); }
-        .speaker-photo img { 
-            width: 100%; height: 100%; object-fit: cover; 
-            filter: grayscale(100%) contrast(1.1); transition: filter 0.5s ease, transform 0.5s ease; 
-        }
+        .speaker-photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(1.1); transition: filter 0.5s ease, transform 0.5s ease; }
         .speaker-card:hover .speaker-photo img { filter: grayscale(0%) contrast(1); transform: scale(1.08); }
         .speaker-card h3 { color: var(--text-white); font-size: 1.35rem; margin-bottom: 5px; }
         .speaker-card p { color: var(--brand-yellow); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
+        /* --- JOURNEY & MARQUEES --- */
         .marquee-wrapper { display: flex; overflow: hidden; width: 100%; max-width: 1200px; margin: 15px auto; -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
         .marquee-track { display: flex; gap: 20px; width: max-content; align-items: center; animation: scroll-left 25s linear infinite; }
         .marquee-track.reverse { animation: scroll-right 25s linear infinite; }
@@ -399,18 +433,37 @@
         .social-mini-tab a { color: var(--text-white); text-decoration: none; font-size: 1.8rem; transition: color 0.3s, transform 0.3s; }
         .social-mini-tab a:hover { color: var(--brand-red); transform: translateY(-3px); }
 
+        /* --- EVENTS FLIP CARDS --- */
         .flip-card { background: transparent; width: 100%; max-width: 260px; height: 420px; perspective: 1000px; flex-shrink: 0; }
         .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
         .flip-card:hover .flip-card-inner, .flip-card:active .flip-card-inner { transform: rotateY(180deg); }
-        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; border: 2px solid rgba(255, 255, 255, 0.1); overflow: hidden; }
-        .flip-card-front { background: linear-gradient(145deg, rgba(20,4,4,0.95), rgba(3,1,1,0.95)); box-shadow: 0 10px 30px rgba(0,0,0,0.8); justify-content: flex-start; }
-        .flip-card-front h3 { font-size: 1.2rem; color: var(--brand-yellow); text-transform: uppercase; margin-top: auto; padding-bottom: 15px;}
-        .game-img-placeholder { width: 100%; height: 280px; background: rgba(230, 43, 43, 0.06); border: 1px solid rgba(230, 43, 43, 0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3); }
-        .flip-card-back { background: rgba(20,4,4,0.98); border-color: var(--brand-red); box-shadow: 0 15px 40px rgba(230, 43, 43, 0.2); transform: rotateY(180deg); justify-content: center; text-align: left; }
+        
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; border: 2px solid rgba(255, 255, 255, 0.1); overflow: hidden; transition: box-shadow 0.3s ease;}
+        
+        .flip-card-front { 
+            background: linear-gradient(145deg, rgba(30,10,10,0.95), rgba(5,2,2,0.95)); 
+            box-shadow: 0 0 20px rgba(252, 163, 17, 0.25); 
+            border-color: rgba(252, 163, 17, 0.4);
+            justify-content: flex-start; 
+            padding: 0;
+        }
+        .flip-card:hover .flip-card-front { box-shadow: 0 0 35px rgba(252, 163, 17, 0.6); }
+        .flip-card-front h3 { font-size: 1.2rem; color: var(--brand-yellow); text-transform: uppercase; margin-top: auto; padding: 0 15px 15px 15px;}
+        .event-img { width: 100%; height: calc(100% - 60px); object-fit: cover; border-radius: 10px 10px 0 0; margin-bottom: auto; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+
+        .flip-card-back { 
+            background: linear-gradient(145deg, rgba(20,4,4,0.98), rgba(10,2,2,0.98));
+            border-color: rgba(230, 43, 43, 0.6); 
+            box-shadow: 0 0 35px rgba(230, 43, 43, 0.6); 
+            transform: rotateY(180deg); justify-content: center; text-align: left; 
+            padding: 20px;
+        }
         .flip-card-back h3 { color: var(--text-white); margin-bottom: 15px; font-size: 1.4rem;}
         .flip-card-back p { font-size: 0.9rem; color: #ccc; line-height: 1.5; margin-bottom: 20px;}
+        
         .flip-card-front::after, .flip-card-back::after { content: ''; position: absolute; top: 0; left: -200%; width: 150%; height: 100%; background: linear-gradient(105deg, transparent 20%, rgba(252, 163, 17, 0.1) 25%, rgba(255, 235, 130, 0.4) 50%, rgba(252, 163, 17, 0.1) 75%, transparent 80%); transform: skewX(-25deg); z-index: 10; pointer-events: none; opacity: 0; transition: left 0.6s cubic-bezier(0.4, 0.2, 0.2, 1), opacity 0.1s ease; }
         .flip-card:hover .flip-card-front::after, .flip-card:active .flip-card-front::after, .flip-card:hover .flip-card-back::after, .flip-card:active .flip-card-back::after { left: 200%; opacity: 1; }
+        
         .event-meta { background: rgba(252, 163, 17, 0.08); padding: 10px; border-left: 3px solid var(--brand-yellow); border-radius: 4px; }
         .event-meta span { display: block; font-size: 0.85rem; font-weight: 800; color: var(--brand-yellow); text-transform: uppercase; }
         .event-meta span i { margin-right: 8px; }
@@ -422,24 +475,36 @@
         @media (min-width: 1024px) { #events-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; } #events-grid .flip-card { max-width: none; } #events-grid .flip-card:nth-child(n+3) { display: block; } #events-grid .flip-card:nth-child(n+6) { display: none; } }
         #events-grid.expanded .flip-card { display: block !important; }
 
+        /* --- SPONSORS SECTION --- */
         .sponsor-logo { height: 60px; width: auto; max-width: 180px; object-fit: contain; filter: grayscale(100%) opacity(0.4); transition: all 0.3s ease; margin: 0 30px; }
         .sponsor-logo:hover { filter: grayscale(0%) opacity(1); }
         #sponsors .marquee-wrapper:first-of-type { margin-bottom: 40px; }
 
-        /* --- FOOTER & DIVIDER --- */
+        /* --- FOOTER SECTION --- */
         .footer-divider { display: flex; align-items: center; justify-content: center; width: 90%; max-width: 1200px; margin: 0 auto; padding: 60px 0 20px 0; }
         .footer-divider .line { flex-grow: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(252, 163, 17, 0.5), transparent); }
         .footer-divider .divider-text { padding: 0 20px; color: var(--text-white); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; opacity: 0.8; }
 
         footer { width: 100%; padding: 40px 8% 30px 8%; background: linear-gradient(to top, rgba(10,2,2,0.95), transparent); border-top: 1px solid rgba(230, 43, 43, 0.15); }
-        .footer-content { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px; margin-bottom: 40px; text-align: left;}
-        .footer-logo { height: 150px; width: auto; object-fit: contain; opacity: 0.8; transition: opacity 0.3s; }
+        .footer-content { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px; margin-bottom: 40px; text-align: left;}
+        
+        .footer-logo { height: 70px; width: auto; object-fit: contain; opacity: 0.8; transition: opacity 0.3s; display: block; margin: 0; }
         .footer-logo:hover { opacity: 1; }
+        
+        .footer-col { flex: 1; min-width: 200px; }
         .footer-col h4 { color: var(--brand-yellow); margin-bottom: 15px; font-size: 1.2rem; }
         .footer-col ul { list-style: none; }
-        .footer-col ul li { margin-bottom: 10px; }
+        .footer-col ul li { margin-bottom: 10px; font-size: 0.9rem; }
         .footer-col a { color: #aaa; text-decoration: none; transition: color 0.3s; }
         .footer-col a:hover { color: var(--text-white); }
+        
+        .contact-list li { margin-bottom: 15px !important; line-height: 1.5; }
+        .contact-list strong { color: var(--text-white); font-weight: 600; letter-spacing: 1px; display: inline-block; margin-bottom: 2px;}
+
+        .footer-socials { display: flex; gap: 15px; margin-top: 25px; }
+        .footer-socials a { color: #aaa; font-size: 1.5rem; transition: color 0.3s, transform 0.3s; }
+        .footer-socials a:hover { color: var(--brand-yellow); transform: translateY(-3px); }
+
         .footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: #666; font-size: 0.8rem; }
     </style>
 </head>
@@ -454,7 +519,7 @@
             <a href="#events">Events</a>
             <a href="#speakers">Speakers</a>
             <a href="#sponsors">Sponsors</a>
-            <a href="campus.html">Campus</a>
+            <a href="campus.html">Campus/ Hostel</a>
             <a href="register.html" class="btn-gradient">Register</a>
         </nav>
 
@@ -473,7 +538,7 @@
             <li><a href="#events" class="nav-item">Events</a></li>
             <li><a href="#speakers" class="nav-item">Speakers</a></li>
             <li><a href="#sponsors" class="nav-item">Sponsors</a></li>
-            <li><a href="campus.html" class="nav-item">Campus</a></li>
+            <li><a href="campus.html" class="nav-item">Campus/ Hostel</a></li>
             <li style="margin-top: 30px; display: flex; gap: 15px; justify-content: center; width: 100%; max-width: 320px;">
                 <a href="register.html" class="btn-gradient nav-item" style="font-size: 1.1rem; width: 100%; text-align: center;">Register</a>
             </li>
@@ -485,7 +550,6 @@
     <div class="scroll-container">
         
         <section id="hero">
-
             <div class="hero-corner corner-left"></div>
             <div class="hero-corner corner-right">
                 <span></span><span></span><span></span>
@@ -515,15 +579,19 @@
                         <span class="highlight">S</span><span class="hidden-text">HIFT</span>
                     </div>
                 </div>
+
+                <div class="hero-logos">
+                    <div class="circle"><img src="https://www.uietkuk.ac.in/mrcn/images/kuk_logo.png" alt="Logo 1"></div>
+                    <div class="circle"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHtYFkkRfYzYkOZwo6tarFXFMQecstPHPL5A&s" alt="Logo 2"></div>
+                    <div class="circle"><img src="https://www.uietkuk.ac.in/mrcn/images/kuk_logo.png" alt="Logo 3"></div>
+                </div>
                 
                 <div class="hero-buttons">
                     <a href="register.html" class="btn-primary-large">Register</a>
                     <a href="register.html" class="btn-secondary-large">Login</a>
                 </div>
 
-                <!-- UPDATED HERO TIMER WITH TITLE -->
                 <div class="hero-timer-wrapper" id="countdown-wrapper">
-                    <div class="timer-title">MISSION ACTIVE IN :</div>
                     <div class="hero-timer" id="countdown-timer">
                         <div class="time-block">
                             <span class="time-value" id="days">00</span>
@@ -546,33 +614,31 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
 
         <section id="about">
             <div class="ui-panel">
                 <div class="about-layout">
-                    
                     <div class="about-content">
                         <h2>THE CORE <span style="color: var(--text-white); font-weight: 300;">MISSION</span></h2>
                         <p class="subtitle">E-Summit 2026 is a tech-driven ecosystem catalyst. We assemble premier software architects, visionary founders, and venture funds within Kurukshetra to rewrite systemic boundaries. Shift your paradigm from simply adapting to actively constructing the matrix.</p>
                         
                         <div class="stats-grid">
                             <div class="stat-card">
-                                <h3>3<span>h</span></h3>
+                                <h3><span class="counter" data-target="3">0</span><span></span></h3>
                                 <p>Days of Acceleration</p>
                             </div>
                             <div class="stat-card">
-                                <h3>50+</h3>
+                                <h3><span class="counter" data-target="50">0</span>+</h3>
                                 <p>Industry Leaders</p>
                             </div>
                             <div class="stat-card">
-                                <h3>12+</h3>
+                                <h3><span class="counter" data-target="12">0</span>+</h3>
                                 <p>High-Stake Events</p>
                             </div>
                             <div class="stat-card">
-                                <h3>₹5L+</h3>
+                                <h3>₹<span class="counter" data-target="5">0</span>L+</h3>
                                 <p>In Prize Bounties</p>
                             </div>
                         </div>
@@ -583,7 +649,6 @@
                         <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=400&q=80" alt="Networking Arena" class="collage-img collage-2">
                         <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80" alt="Hackathon Sprint" class="collage-img collage-3">
                     </div>
-
                 </div>
             </div>
         </section>
@@ -591,7 +656,7 @@
         <section id="journey">
             <div class="ui-panel">
                 <h2 style="text-align: center;">TRACK THE <span style="color: var(--text-white); font-weight: 300;">JOURNEY</span></h2>
-                <p class="subtitle" style="text-align: center; margin-left: auto; margin-right: auto;">Witness the execution. Join our Journey and see how we planned the Event.</p>
+                <p class="subtitle" style="text-align: center; margin-left: auto; margin-right: auto;">Witness the execution. Join our Journey and see how we planned the Event. Follow us on our Social Media Handles.</p>
                 
                 <div class="marquee-wrapper">
                     <div class="marquee-track">
@@ -610,11 +675,11 @@
                     <div class="marquee-track reverse">
                         <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Planning">
                         <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Team">
-                        <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Execution">
+                        <img src="https://res.cloudinary.com/di10wvjn8/image/upload/v1781434294/samples/imagecon-group.jpg" loading="lazy" class="journey-img" alt="Execution">
                         <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Coding">
                         <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Planning">
                         <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Team">
-                        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32d7?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Execution">
+                        <img src="https://res.cloudinary.com/di10wvjn8/image/upload/v1781434294/samples/imagecon-group.jpg" loading="lazy" class="journey-img" alt="Execution">
                         <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=400&q=80" loading="lazy" class="journey-img" alt="Coding">
                     </div>
                 </div>
@@ -623,6 +688,7 @@
                     <a href="https://www.instagram.com/esummit_uietkuk/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
                     <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
                     <a href="https://twitter.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="https://youtube.com" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
                 </div>
             </div>
         </section>
@@ -630,13 +696,13 @@
         <section id="events">
             <div class="ui-panel">
                 <h2 style="text-align: center;">PLANNED <span style="color: var(--text-white); font-weight: 300;">EVENTS</span></h2>
-                <p class="subtitle" style="text-align: center; margin-left: auto; margin-right: auto;">Massive energy events designed to accelerate your growth. Enter the gravity well of innovation.</p>
+                <p class="subtitle" style="text-align: center; margin-left: auto; margin-right: auto;">Massive energy events designed to accelerate your growth. Enter the gravity well of innovation.<br><b> (Note : Click/ Hover over the cards to see Event Details)</b></p>
                 
                 <div id="events-grid">
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ Hackathon Visual ]</div>
+                                <img src="https://res.cloudinary.com/di10wvjn8/image/upload/v1781434490/ChatGPT_Image_Jun_14_2026_04_23_38_PM_c11dey.png" alt="Hackathon" class="event-img">
                                 <h3>Hackathon 2.0</h3>
                             </div>
                             <div class="flip-card-back">
@@ -653,7 +719,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ Pitch Desk Visual ]</div>
+                                <img src="https://res.cloudinary.com/di10wvjn8/image/upload/v1781434726/ChatGPT_Image_Jun_14_2026_04_23_28_PM_ri5zif.png" alt="Pitch Desk" class="event-img">
                                 <h3>Pitch Desk</h3>
                             </div>
                             <div class="flip-card-back">
@@ -670,7 +736,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ Workshop Visual ]</div>
+                                <img src="https://res.cloudinary.com/di10wvjn8/image/upload/v1781434727/ChatGPT_Image_Jun_14_2026_04_23_17_PM_dfdfzt.png" alt="Workshops" class="event-img">
                                 <h3>Workshops</h3>
                             </div>
                             <div class="flip-card-back">
@@ -687,7 +753,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ Web3 Panel Visual ]</div>
+                                <img src="https://res.cloudinary.com/di10wvjn8/image/upload/v1781434729/ChatGPT_Image_Jun_14_2026_04_23_07_PM_udxmsk.png" alt="Web3 Panel" class="event-img">
                                 <h3>Web3 Panel</h3>
                             </div>
                             <div class="flip-card-back">
@@ -704,7 +770,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ AI Hack Visual ]</div>
+                                <img src="https://res.cloudinary.com/di10wvjn8/image/upload/v1781434710/ChatGPT_Image_Jun_14_2026_04_22_54_PM_vbygwp.png" alt="AI Hack" class="event-img">
                                 <h3>AI Prompt Hack</h3>
                             </div>
                             <div class="flip-card-back">
@@ -721,7 +787,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ E-Sports Visual ]</div>
+                                <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80" alt="E-Sports" class="event-img">
                                 <h3>E-Sports Clash</h3>
                             </div>
                             <div class="flip-card-back">
@@ -738,7 +804,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ UI/UX Visual ]</div>
+                                <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80" alt="UI/UX" class="event-img">
                                 <h3>Design Relay</h3>
                             </div>
                             <div class="flip-card-back">
@@ -755,7 +821,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ Robotics Visual ]</div>
+                                <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80" alt="Robo Wars" class="event-img">
                                 <h3>Robo Wars</h3>
                             </div>
                             <div class="flip-card-back">
@@ -772,7 +838,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ Founders Visual ]</div>
+                                <img src="https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=400&q=80" alt="Founders Story" class="event-img">
                                 <h3>Founder's Story</h3>
                             </div>
                             <div class="flip-card-back">
@@ -789,7 +855,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <div class="game-img-placeholder">[ Mixer Visual ]</div>
+                                <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80" alt="Mixer" class="event-img">
                                 <h3>Tech Mixer</h3>
                             </div>
                             <div class="flip-card-back">
@@ -855,7 +921,7 @@
 
         <section id="sponsors">
             <div class="ui-panel">
-                <h2 style="text-align: center;">OUR <span style="color: var(--text-white); font-weight: 300;">SPONSORS</span></h2>
+                <h2 style="text-align: center;">Backed <span style="color: var(--text-white); font-weight: 300;">By Giants</span></h2>
                 <p class="subtitle" style="text-align: center; margin-left: auto; margin-right: auto;">Fueled by industry giants and incubation pioneers.</p>
                 
                 <div class="marquee-wrapper">
@@ -876,12 +942,12 @@
                     <div class="marquee-track reverse">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" loading="lazy" class="sponsor-logo" alt="IBM">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Intel_logo_%282020%2C_light_blue%29.svg" loading="lazy" class="sponsor-logo" alt="Intel">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg" loading="lazy" class="sponsor-logo" alt="TCS">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" loading="lazy" class="sponsor-logo" alt="TCS">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg" loading="lazy" class="sponsor-logo" alt="Infosys">
                         
                         <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" loading="lazy" class="sponsor-logo" alt="IBM">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Intel_logo_%282020%2C_light_blue%29.svg" loading="lazy" class="sponsor-logo" alt="Intel">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg" loading="lazy" class="sponsor-logo" alt="TCS">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" loading="lazy" class="sponsor-logo" alt="TCS">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg" loading="lazy" class="sponsor-logo" alt="Infosys">
                     </div>
                 </div>
@@ -896,10 +962,17 @@
 
         <footer id="footer">
             <div class="footer-content ui-panel" style="max-width: 1200px; margin: 0 auto; transform: none; opacity: 1;">
-                <div class="footer-col">
+                <div class="footer-col" style="flex: 1.2;">
                     <a href="#" class="logo"><img src="e-logo.png" alt="UIET KUK Logo" class="footer-logo"></a>
                     <p style="margin-top: 15px; color: #888; max-width: 300px;">Igniting the shift in technology and entrepreneurship. Join the revolution.</p>
+                    <div class="footer-socials">
+                        <a href="https://www.instagram.com/esummit_uietkuk/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                        <a href="https://twitter.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="https://youtube.com" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
                 </div>
+                
                 <div class="footer-col">
                     <h4>Quick Links</h4>
                     <ul>
@@ -909,12 +982,22 @@
                         <li><a href="campus.html">Campus</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-col">
-                    <h4>Contact Command</h4>
+                    <h4>Legal</h4>
                     <ul>
-                        <li>esummit@uietkuk.ac.in</li>
-                        <li>+91 9718023172</li>
-                        <li>Kurukshetra University, Haryana</li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Refund Policy</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col" style="flex: 1.5;">
+                    <h4>Contact Command</h4>
+                    <ul class="contact-list">
+                        <li><strong><u>Website/Event Query :</u></strong><br>> esummit@uietkuk.ac.in<br>> +91 9718023172</li>
+                        <li><strong><u>Sponsorship Query :</u></strong><br>> sponsor@uietkuk.ac.in</li>
                     </ul>
                 </div>
             </div>
@@ -924,8 +1007,8 @@
         </footer>
     </div>
 
-    <!-- TIMER JAVASCRIPT LOGIC -->
     <script>
+        /* --- TIMER LOGIC --- */
         const targetDate = new Date("Sept 14, 2026 10:00:00").getTime();
 
         const updateTimer = () => {
@@ -933,7 +1016,7 @@
             const distance = targetDate - now;
 
             if (distance < 0) {
-                document.getElementById("countdown-wrapper").innerHTML = "<h3 style='color: var(--brand-yellow); margin:0;'>SYSTEM ONLINE // EVENT STARTED</h3>";
+                document.getElementById("countdown-wrapper").innerHTML = "<h3 style='color: var(--cyber-cyan); margin:0; text-shadow: 0 0 10px rgba(0,255,255,0.8);'>SYSTEM ONLINE // EVENT STARTED</h3>";
                 return;
             }
 
@@ -950,10 +1033,8 @@
 
         setInterval(updateTimer, 1000);
         updateTimer(); 
-    </script>
 
-    <script>
-        // UI Interaction Logic
+        /* --- UI INTERACTION LOGIC --- */
         const burger = document.getElementById('burger-menu');
         const navOverlay = document.getElementById('nav-overlay');
         const navItems = document.querySelectorAll('.nav-item');
@@ -999,9 +1080,7 @@
             setTimeout(() => { ScrollTrigger.refresh(); }, 350);
         });
 
-        // ==========================================
-        // THREE.JS PERFORMANCE OPTIMIZED
-        // ==========================================
+        /* --- THREE.JS BACKGROUND --- */
         gsap.registerPlugin(ScrollTrigger);
 
         const canvas = document.getElementById('bg-canvas');
@@ -1009,7 +1088,6 @@
         scene.fog = new THREE.FogExp2(0x030101, 0.002); 
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
-
         let isMobile = window.innerWidth <= 768;
 
         function updateCameraPosition() {
@@ -1027,11 +1105,10 @@
         renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
 
         const glowMat = new THREE.PointsMaterial({ size: 0.4, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false });
-
         const celestialGroup = new THREE.Group();
         
         let bigPlanet, bigPlanetRight;
-        const bigPlanetGeo = new THREE.IcosahedronGeometry(isMobile ? 55 : 60, 2); 
+        const bigPlanetGeo = new THREE.IcosahedronGeometry(isMobile ? 50 : 60, 2); 
         const bigPlanetMat = new THREE.MeshBasicMaterial({ color: 0xe62b2b, wireframe: true, transparent: true, opacity: isMobile ? 0.15 : 0.25 });
         
         bigPlanet = new THREE.Mesh(bigPlanetGeo, bigPlanetMat);
@@ -1099,36 +1176,107 @@
         const stars = new THREE.Points(starsGeo, glowMat);
         scene.add(stars);
 
-
         const riftGroup = new THREE.Group();
-        let meteorBeltTop, meteorBeltBottom;
+        const mobileBodiesGroup = new THREE.Group();
+        let mBody1, mBody2, mBody3;
+        const mobileEmitters = [];
 
         if (isMobile) {
-            const createThickBelt = (yBase, ySpread) => {
+            // Reusable function to create optimized, distinct planetary bodies with emitting particles
+            function createMobilePlanet(radius, coreHex, edgeHex, hasRing, ringSpread, posX, posY, posZ) {
+                const group = new THREE.Group();
+                group.position.set(posX, posY, posZ);
+
+                // Body core
                 const geo = new THREE.BufferGeometry();
-                const count = 1500; 
+                const count = 250; // Lower density
                 const pos = new Float32Array(count * 3);
                 const col = new Float32Array(count * 3);
+                const coreC = new THREE.Color(coreHex);
+                const edgeC = new THREE.Color(edgeHex);
+                
                 for(let i=0; i<count; i++) {
-                    pos[i*3] = (Math.random() - 0.5) * 180; 
-                    pos[i*3+1] = yBase + (Math.random() - 0.5) * ySpread; 
-                    pos[i*3+2] = 10 + (Math.random() - 0.5) * 30; 
+                    const u = Math.random(); const v = Math.random();
+                    const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
+                    const r = radius * Math.cbrt(Math.random()); 
                     
-                    const isYellow = Math.random() > 0.4;
-                    const isBright = Math.random() > 0.8;
-                    col[i*3] = isYellow ? (isBright ? 1.0 : 0.9) : (isBright ? 0.98 : 0.8);
-                    col[i*3+1] = isYellow ? (isBright ? 0.8 : 0.5) : (isBright ? 0.2 : 0.1);
-                    col[i*3+2] = isYellow ? (isBright ? 0.2 : 0.0) : 0.1;
+                    pos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+                    pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+                    pos[i*3+2] = r * Math.cos(phi);
+                    
+                    const mix = r/radius;
+                    col[i*3] = coreC.r * (1-mix) + edgeC.r * mix;
+                    col[i*3+1] = coreC.g * (1-mix) + edgeC.g * mix;
+                    col[i*3+2] = coreC.b * (1-mix) + edgeC.b * mix;
                 }
                 geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
                 geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-                return new THREE.Points(geo, glowMat);
-            };
+                group.add(new THREE.Points(geo, glowMat));
+
+                // Optional Ring
+                if(hasRing) {
+                    const rGeo = new THREE.BufferGeometry();
+                    const rCount = 400;
+                    const rPos = new Float32Array(rCount * 3);
+                    const rCol = new Float32Array(rCount * 3);
+                    for(let i=0; i<rCount; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = radius * 1.3 + Math.random() * ringSpread;
+                        rPos[i*3] = Math.cos(angle) * dist;
+                        rPos[i*3+1] = (Math.random() - 0.5) * 1.5; 
+                        rPos[i*3+2] = Math.sin(angle) * dist;
+                        rCol[i*3] = edgeC.r; rCol[i*3+1] = edgeC.g; rCol[i*3+2] = edgeC.b;
+                    }
+                    rGeo.setAttribute('position', new THREE.BufferAttribute(rPos, 3));
+                    rGeo.setAttribute('color', new THREE.BufferAttribute(rCol, 3));
+                    const ring = new THREE.Points(rGeo, glowMat);
+                    ring.rotation.x = Math.PI / 2.5; 
+                    group.add(ring);
+                }
+
+                // Emitting/Exiting Particles
+                const emitCount = 80;
+                const emitGeo = new THREE.BufferGeometry();
+                const emitPos = new Float32Array(emitCount * 3);
+                const emitCol = new Float32Array(emitCount * 3);
+                const emitVel = [];
+                for(let i=0; i<emitCount; i++) {
+                    emitPos[i*3] = 0; emitPos[i*3+1] = 0; emitPos[i*3+2] = 0;
+                    emitCol[i*3] = edgeC.r; emitCol[i*3+1] = edgeC.g; emitCol[i*3+2] = edgeC.b;
+                    
+                    const u = Math.random(); const v = Math.random();
+                    const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
+                    const speed = 0.1 + Math.random() * 0.2; 
+                    
+                    emitVel.push({
+                        vx: speed * Math.sin(phi) * Math.cos(theta),
+                        vy: speed * Math.sin(phi) * Math.sin(theta),
+                        vz: speed * Math.cos(phi),
+                        life: Math.random() * 200 
+                    });
+                }
+                emitGeo.setAttribute('position', new THREE.BufferAttribute(emitPos, 3));
+                emitGeo.setAttribute('color', new THREE.BufferAttribute(emitCol, 3));
+                const emitters = new THREE.Points(emitGeo, glowMat);
+                emitters.userData = { velocities: emitVel, maxLife: 200, radius: radius };
+                group.add(emitters);
+                mobileEmitters.push(emitters);
+
+                return group;
+            }
+
+            // Placed according to the drawn blue zones on mobile
+            // Body 1: Saturn-like (Top Right Area)
+            mBody1 = createMobilePlanet(17, 0xfca311, 0xe62b2b, true, 8, 25, 45, -20);
             
-            meteorBeltTop = createThickBelt(60, 60);  
-            meteorBeltBottom = createThickBelt(-45, 60); 
-            scene.add(meteorBeltTop);
-            scene.add(meteorBeltBottom);
+            // Body 2: Cyber-Cyan Orb (Mid-Left Area)
+            mBody2 = createMobilePlanet(16, 0x00ffff, 0x0055ff, false, 0, -32, 5, -15);
+            
+            // Body 3: White/Gold Small Ringed Planet (Bottom Right Area)
+            mBody3 = createMobilePlanet(14, 0xffffff, 0xfca311, true, 5, 25, -35, 5);
+
+            mobileBodiesGroup.add(mBody1, mBody2, mBody3);
+            scene.add(mobileBodiesGroup);
 
         } else {
             const riftGeo = new THREE.BufferGeometry();
@@ -1199,18 +1347,35 @@
             if(bigPlanetRight) bigPlanetRight.rotation.y -= 0.0008; 
             
             if (isMobile) {
-                const animateBelt = (belt, baseSpeed) => {
-                    if(!belt) return;
-                    const positions = belt.geometry.attributes.position.array;
-                    for(let i=0; i<positions.length; i+=3) {
-                        const speed = baseSpeed + (i % 7) * 0.015; 
-                        positions[i] += speed; 
-                        if (positions[i] > 120) positions[i] = -120; 
+                // Independently animate the distinct mobile bodies
+                if(mBody1) { mBody1.rotation.y += 0.003; mBody1.rotation.z += 0.001; }
+                if(mBody2) { mBody2.rotation.y -= 0.004; mBody2.rotation.x += 0.002; }
+                if(mBody3) { mBody3.rotation.y += 0.005; mBody3.rotation.x -= 0.001; }
+
+                // Animate emitting particles escaping the bodies
+                mobileEmitters.forEach(emitter => {
+                    const positions = emitter.geometry.attributes.position.array;
+                    const vels = emitter.userData.velocities;
+                    const radius = emitter.userData.radius;
+                    for(let i=0; i<vels.length; i++) {
+                        vels[i].life++;
+                        if(vels[i].life > emitter.userData.maxLife) {
+                            // Reset back to surface
+                            vels[i].life = 0;
+                            const u = Math.random(); const v = Math.random();
+                            const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
+                            positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+                            positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta);
+                            positions[i*3+2] = radius * Math.cos(phi);
+                        } else {
+                            // Move particle outwards
+                            positions[i*3] += vels[i].vx;
+                            positions[i*3+1] += vels[i].vy;
+                            positions[i*3+2] += vels[i].vz;
+                        }
                     }
-                    belt.geometry.attributes.position.needsUpdate = true;
-                };
-                animateBelt(meteorBeltTop, 0.15); 
-                animateBelt(meteorBeltBottom, 0.12); 
+                    emitter.geometry.attributes.position.needsUpdate = true;
+                });
             }
 
             planet1.rotation.y += 0.001; planet1.rotation.x += 0.0005; planet2.rotation.y -= 0.0005; 
@@ -1230,64 +1395,122 @@
             updateCameraPosition();
         });
 
-        // ==========================================
-        // SCROLL TRIGGER TIMELINES
-        // ==========================================
+        /* --- SCROLL TRIGGER TIMELINES --- */
         function initScrollAnimations() {
             let targetZ = window.innerWidth <= 768 ? -1500 : -850; 
 
+            // Background Camera Zoom
             let tl = gsap.timeline({
                 scrollTrigger: { trigger: ".scroll-container", start: "top top", end: "bottom bottom", scrub: 1.2 }
             });
-
             tl.to(camera.position, { z: targetZ, ease: "none" });
 
+            // UI Panels Fade In
             const panels = gsap.utils.toArray('.ui-panel');
             panels.forEach((panel, i) => {
                 if (i === 0) {
-                    gsap.fromTo(panel, 
-                        { opacity: 0, y: 30 }, 
-                        { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
-                    );
+                    gsap.fromTo(panel, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1, ease: "power3.out" });
                 } else {
-                    gsap.fromTo(panel, 
-                        { opacity: 0, y: 40 },
+                    gsap.fromTo(panel, { opacity: 0, y: 40 },
                         {
-                            scrollTrigger: {
-                                trigger: panel,
-                                start: "top 90%", 
-                                toggleActions: "play none none reverse" 
-                            },
-                            opacity: 1,
-                            y: 0,
-                            duration: 0.8,
-                            ease: "power2.out"
+                            scrollTrigger: { trigger: panel, start: "top 90%", toggleActions: "play none none reverse" },
+                            opacity: 1, y: 0, duration: 0.8, ease: "power2.out"
                         }
                     );
                 }
             });
-        }
-        
+
+            // --- Mobile-only Collage Animation ---
+            let mm = gsap.matchMedia();
+
+            mm.add("(max-width: 768px)", () => {
+                let collageTl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: ".collage-container",
+                        start: "top 85%", 
+                        toggleActions: "play none none reverse",
+                        onComplete: () => document.querySelector('.collage-container').classList.add('show-glow'),
+                        onReverseComplete: () => document.querySelector('.collage-container').classList.remove('show-glow')
+                    }
+                });
+
+                collageTl.from(".collage-1", { 
+                    x: -window.innerWidth, 
+                    rotation: -45,         
+                    opacity: 0, 
+                    duration: 0.4, 
+                    ease: "power3.out", 
+                    clearProps: "all"      
+                }, 0)
+                .from(".collage-2", { 
+                    x: window.innerWidth,  
+                    rotation: 45,
+                    opacity: 0, 
+                    duration: 0.4, 
+                    ease: "power3.out",
+                    clearProps: "all"
+                }, 0)
+                .from(".collage-3", { 
+                    y: 400,                
+                    opacity: 0, 
+                    duration: 0.4, 
+                    ease: "power3.out",
+                    clearProps: "all"
+                }, 0);
+            });
+
+            // --- Number Counter Animation ---
+            let counters = gsap.utils.toArray('.counter');
+            
+            ScrollTrigger.create({
+                trigger: ".stats-grid",
+                start: "top 90%", 
+                onEnter: () => {
+                    counters.forEach(counter => {
+                        let target = parseInt(counter.getAttribute('data-target'));
+                        gsap.fromTo(counter, 
+                            { innerText: 0 }, 
+                            { 
+                                innerText: target, 
+                                duration: 3,           
+                                snap: { innerText: 1 }, 
+                                ease: "power3.out"     
+                            }
+                        );
+                    });
+                },
+                once: true 
+            });
+        }        
         document.addEventListener("DOMContentLoaded", () => {
             ScrollTrigger.refresh(); 
             initScrollAnimations();
         });
-    </script>
-    <script>
-        // --- SMART NAVIGATION LOGIC ---
+
+        /* --- SMART NAVIGATION LOGIC --- */
         document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('esummit_token');
-            if (token) {
-                const navButtons = document.querySelectorAll('.desktop-nav a[href="register.html"], .nav-links a[href="register.html"]');
-                navButtons.forEach(btn => {
-                    btn.href = "dashboard.html"; 
-                    btn.innerText = "Dashboard"; 
-                    btn.style.background = "linear-gradient(45deg, #fca311, #e62b2b)"; 
-                });
+            
+            const desktopNavBtn = document.querySelector('.desktop-nav a.btn-gradient');
+            const mobileNavBtn = document.querySelector('.nav-links a.btn-gradient');
+            const heroButtonsContainer = document.querySelector('.hero-buttons');
 
-                const heroButtonsContainer = document.querySelector('.hero-buttons');
+            if (token) {
+                if (desktopNavBtn) {
+                    desktopNavBtn.href = "dashboard.html"; 
+                    desktopNavBtn.innerHTML = 'Dashboard'; 
+                }
+                if (mobileNavBtn) {
+                    mobileNavBtn.href = "dashboard.html"; 
+                    mobileNavBtn.innerHTML = 'Dashboard'; 
+                }
+
                 if (heroButtonsContainer) {
-                    heroButtonsContainer.style.display = "none";
+                    heroButtonsContainer.innerHTML = `
+                        <a href="dashboard.html" class="btn-primary-large">
+                            Access Dashboard
+                        </a>
+                    `;
                 }
             }
         });

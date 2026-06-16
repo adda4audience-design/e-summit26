@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Dashboard | E-Summit</title>
+    <title>User Dashboard | E-Summit</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- PDF Generation and Vector Scanning Implementations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -66,7 +65,26 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; box-sizing: border-box;}
 
         /* --- TICKET MODAL STYLES --- */
-        .ticket-modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;}
+        .ticket-modal-container { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 2000; display: none; 
+            justify-content: center; align-items: center; 
+            flex-direction: column; backdrop-filter: blur(10px); 
+            padding: 10px; box-sizing: border-box;
+        }
+
+        .pdf-container-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            transform-origin: center center;
+        }
+
+        @media (max-width: 600px) {
+            .pdf-container-wrapper {
+                transform: scale(0.9);
+            }
+        }        
         .ticket-modal-container.active { display: flex; }
         .close-ticket-btn { position: absolute; top: 30px; right: 40px; color: white; font-size: 2.5rem; cursor: pointer; transition: color 0.3s; z-index: 2001;}
         .close-ticket-btn:hover { color: var(--brand-red); }
@@ -87,7 +105,7 @@
             letter-spacing: 3px;
         }
 
-/* --- PREMIUM MOBILE DASHBOARD --- */
+        /* --- PREMIUM MOBILE DASHBOARD --- */
         @media (max-width: 768px) {
             body { padding: 70px 15px 30px 15px; align-items: flex-start; }
             .home-btn { top: 15px !important; left: 15px !important; font-size: 1.2rem !important; padding: 8px 12px !important; }
@@ -139,10 +157,9 @@
     <a href="index.html" class="btn-action home-btn" style="position: absolute; top: 30px; left: 30px; border-color: rgba(255,255,255,0.2); color: white;" title="Return Home"><i class="fa-solid fa-house"></i></a>
 
     <div class="dashboard-wrapper" id="dashboard" style="display: none;">
-        <!-- PROFILE DATA GRID -->
         <div class="glass-panel">
             <div class="header">
-                <h1>Agent Data Matrix</h1>
+                <h1>Profile</h1>
                 <div>
                     <button class="btn-action btn-edit" onclick="openEditModal()"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                     <button class="btn-action btn-logout" onclick="logout()">Logout</button>
@@ -150,9 +167,9 @@
             </div>
 
             <div class="details-grid">
-                <div class="data-group"><label><i class="fa-solid fa-user"></i> Agent Name</label><div class="value" id="d-name">--</div></div>
-                <div class="data-group"><label><i class="fa-solid fa-envelope"></i> Email Link</label><div class="value" id="d-email">--</div></div>
-                <div class="data-group"><label><i class="fa-solid fa-phone"></i> Comms (Phone)</label><div class="value" id="d-phone">--</div></div>
+                <div class="data-group"><label><i class="fa-solid fa-user"></i> User Name</label><div class="value" id="d-name">--</div></div>
+                <div class="data-group"><label><i class="fa-solid fa-envelope"></i> Email</label><div class="value" id="d-email">--</div></div>
+                <div class="data-group"><label><i class="fa-solid fa-phone"></i> Phone</label><div class="value" id="d-phone">--</div></div>
                 <div class="data-group"><label><i class="fa-solid fa-building-columns"></i> Institution</label><div class="value" id="d-college">--</div></div>
                 
                 <div id="uiet-specs" style="display: none; grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -160,11 +177,11 @@
                     <div class="data-group"><label><i class="fa-solid fa-id-badge"></i> Roll Number</label><div class="value" id="d-roll">--</div></div>
                 </div>
 
-                <div class="data-group highlight"><label><i class="fa-solid fa-shield"></i> Clearance Status</label><div class="value" id="d-payment">--</div></div>
-                <div class="data-group" id="hostel-spec"><label><i class="fa-solid fa-bed"></i> Hostel Allocation</label><div class="value" id="d-hostel">--</div></div>
+                <div class="data-group highlight"><label><i class="fa-solid fa-shield"></i> Payment Status</label><div class="value" id="d-payment">--</div></div>
+                <div class="data-group" id="hostel-spec"><label><i class="fa-solid fa-bed"></i> Hostel Allocated</label><div class="value" id="d-hostel">--</div></div>
                 
                 <div id="finance-specs" style="display: none; grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="data-group"><label><i class="fa-solid fa-indian-rupee-sign"></i> Amount Settled</label><div class="value" id="d-amount">--</div></div>
+                    <div class="data-group"><label><i class="fa-solid fa-indian-rupee-sign"></i> Amount Paid</label><div class="value" id="d-amount">--</div></div>
                     <div class="data-group"><label><i class="fa-solid fa-file-invoice"></i> UTR Reference</label><div class="value" id="d-utr">--</div></div>
                 </div>
             </div>
@@ -179,27 +196,23 @@
             </div>
         </div>
 
-        <!-- PASS DASHBOARD STUB -->
         <div class="glass-panel ticket-wrapper" id="ticket-render-area">
-            <!-- Injected elements -->
-        </div>
+            </div>
     </div>
 
-    <!-- FULLSCREEN TICKET MODAL -->
     <div class="ticket-modal-container" id="pass-modal">
-        <i class="fa-solid fa-xmark close-ticket-btn" onclick="closeTicketModal()"></i>
-        
-        <!-- Clean PDF Container with NO padding/borders to ruin export -->
-        <div id="pdf-ticket" style="position: relative; width: 100%; max-width: 900px; margin: 0 auto; background: transparent;">
-            <!-- Ticket injected here by JS -->
-        </div>
-
-        <button class="btn-download" style="max-width: 300px; margin-top: 35px;" onclick="downloadTicket()">
-            <i class="fa-solid fa-download"></i> Download Pass
-        </button>
+    <i class="fa-solid fa-xmark close-ticket-btn" onclick="closeTicketModal()"></i>
+    
+    <div class="pdf-container-wrapper">
+        <div id="pdf-ticket" style="position: relative; width: 100%; background: transparent;">
+            </div>
     </div>
 
-    <!-- PROFILE MODIFICATION WINDOW -->
+    <button class="btn-download" style="max-width: 300px; margin-top: 35px;" onclick="downloadTicket()">
+        <i class="fa-solid fa-download"></i> Download Pass
+    </button>
+</div>
+
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-content">
             <h2>Edit Profile</h2>
@@ -244,7 +257,7 @@
     </div>
 
     <script>
-        const API_URL = "http://localhost:5000/api";
+        const API_URL = "https://esummit-backend-gonf.onrender.com/api"
         const token = localStorage.getItem('esummit_token');
         let currentUserData = null;
 
@@ -308,7 +321,7 @@
                         }
                     }
 
-                    // --- NEW MODAL TICKET GENERATION ---
+                    // ---TICKET GENERATION ---
                     const ticketArea = document.getElementById('ticket-render-area');
                     const pdfTicket = document.getElementById('pdf-ticket');
 
@@ -318,8 +331,8 @@
                         ticketArea.innerHTML = `
                             <div style="text-align: center;">
                                 <i class="fa-solid fa-ticket" style="font-size: 3.5rem; color: var(--brand-yellow); margin-bottom: 20px;"></i>
-                                <h2 style="margin: 0 0 10px 0; color: white; letter-spacing: 2px;">PASS GRANTED</h2>
-                                <p style="color: #aaa; margin-bottom: 25px; font-size: 0.9rem;">Your official E-Summit 2026 digital matrix pass is ready for deployment.</p>
+                                <h2 style="margin: 0 0 10px 0; color: limegreen; letter-spacing: 2px;">PASS GRANTED</h2>
+                                <p style="color: #aaa; margin-bottom: 25px; font-size: 0.9rem;">Your official E-Summit 2026 digital pass is Available.</p>
                                 <button class="btn-download" style="width: auto; padding: 12px 35px;" onclick="openTicketModal()">
                                     <i class="fa-solid fa-eye"></i> View Pass
                                 </button>
@@ -331,25 +344,22 @@
                         let id1 = cleanId.substring(0, 2);
                         let id2 = cleanId.substring(2, 4);
                         let id3 = cleanId.substring(4, 6);
-                        let id4 = cleanId.substring(6, 10); // This will just grab whatever characters are left
+                        let id4 = cleanId.substring(6, 10);
 
                         // Inject the clean HTML into the hidden modal for future PDF extraction
                         pdfTicket.innerHTML = `
                             <img src="ticket.png" style="width: 100%; height: auto; display: block; border-radius: 12px;" crossorigin="anonymous">
                             
-                            <!-- Name Overlay (Right Stub) using Montserrat -->
                             <div style="position: absolute; top: 26.5%; right: 0%; color: #fff; font-size: clamp(0.75rem, 1.6vw, 0.8rem); font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; width: 22%; text-align: left; word-wrap: break-word; letter-spacing: 1px;">
                                 ${user.fullName}
                             </div>
 
-                            <!-- 4 Bottom Boxes Overlay using Golden Gradient -->
                             <div class="id-box-overlay golden-gradient" style="bottom: 15%; height: 11%; left: 4.8%; width: 10.3%;">${id1}</div>
                             <div class="id-box-overlay golden-gradient" style="bottom: 15%; height: 11%; left: 16.2%; width: 10.3%;">${id2}</div>
                             <div class="id-box-overlay golden-gradient" style="bottom: 15%; height: 11%; left: 27.6%; width: 10.3%;">${id3}</div>
                             <div class="id-box-overlay golden-gradient" style="bottom: 15%; height: 11%; left: 40.5%; width: 13.5%;">${id4}</div>
 
-                            <!-- QR Code Overlay -->
-                            <div id="qrcode" style="position: absolute; bottom: 8.5%; right: 5.5%; background: #fff; padding: 5px; border-radius: 6px;"></div>
+                            <div id="qrcode" style="position: absolute; bottom: 8.5%; right: 5.5%; width: 18.5%; aspect-ratio: 1; background: #fff; padding: 5px; border-radius: 6px; box-sizing: border-box;"></div>
                         `;
 
                         // Generate the QR Code dynamically inside the modal
@@ -365,7 +375,8 @@
                             const canvas = qrContainer.querySelector('canvas');
                             if(canvas) {
                                 const imgData = canvas.toDataURL("image/png");
-                                qrContainer.innerHTML = `<img src="${imgData}" style="width:100%; height:100%; display:block;" />`;
+                                // Use object-fit contain to ensure it scales perfectly within the new responsive container
+                                qrContainer.innerHTML = `<img src="${imgData}" style="width:100%; height:100%; display:block; object-fit: contain; border-radius: 2px;" />`;
                             }
                         }, 120);
 
@@ -452,36 +463,69 @@
 
         function downloadTicket() {
     const element = document.getElementById('pdf-ticket');
+    const btn = document.querySelector('.btn-download[onclick="downloadTicket()"]');
     
-    // Briefly force a fixed width for consistent high-res generation
+    // UI Feedback
+    const originalBtnText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+    btn.disabled = true;
+
+    // Save original styles so we can restore them later
     const originalWidth = element.style.width;
-    element.style.width = '1100px'; 
+    const originalPosition = element.style.position;
+    const originalTop = element.style.top;
+    const originalLeft = element.style.left;
 
-    // Dynamically calculate the exact height based on the image's aspect ratio
-    const exactWidth = element.offsetWidth;
-    const exactHeight = element.offsetHeight;
+    // THE FIX: Tear it out of the flexbox centering and force it to coordinate (0,0)
+    // This ensures no part of the ticket is pushed off the left side of the screen
+    element.style.position = 'fixed';
+    element.style.top = '0';
+    element.style.left = '0';
+    element.style.width = '1200px'; 
 
-    const opt = {
-        margin: 0,
-        filename: 'ESummit_26_Pass.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { 
-            scale: 2,
-            useCORS: true, 
-            backgroundColor: null 
-        },
-        jsPDF: { 
-            unit: 'px', // Switched to pixels
-            format: [exactWidth, exactHeight], // PDF will be exactly the size of the image
-            orientation: exactWidth > exactHeight ? 'landscape' : 'portrait' 
-        }
-    };
+    setTimeout(() => {
+        const exactWidth = element.clientWidth; 
+        const exactHeight = element.clientHeight;
 
-    html2pdf().set(opt).from(element).save().then(() => {
-        // Revert to responsive width after generating
-        element.style.width = originalWidth;
-    });
+        const opt = {
+            margin: 0,
+            filename: `${currentUserData.fullName.replace(/\s+/g, '_')}_ESummit_Pass.pdf`,
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: '#000000',
+                // Explicitly tell the canvas to capture exactly from the 0,0 origin
+                x: 0,
+                y: 0,
+                scrollX: 0,
+                scrollY: 0,
+                width: exactWidth,
+                height: exactHeight
+            },
+            jsPDF: { 
+                unit: 'px',
+                // Keep the +2 buffer here to prevent the blank page bug
+                format: [exactWidth + 2, exactHeight + 2], 
+                orientation: 'landscape',
+                hotfixes: ["px_scaling"] 
+            },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } 
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            // Revert all styles to put the ticket exactly back where it belongs
+            element.style.position = originalPosition;
+            element.style.top = originalTop;
+            element.style.left = originalLeft;
+            element.style.width = originalWidth;
+            
+            btn.innerHTML = originalBtnText;
+            btn.disabled = false;
+        });
+    }, 250); // Slightly longer delay to ensure the browser paints the new position
 }
+        
         function logout() {
             localStorage.removeItem('esummit_token');
             window.location.href = "register.html";

@@ -46,23 +46,23 @@
 <body>
 
     <div class="login-panel">
-        <h2><i class="fa-solid fa-lock"></i> System Override</h2>
+        <h2><i class="fa-solid fa-lock"></i> Admin Login</h2>
         <form id="admin-login-form">
             <div class="input-group">
-                <label>Admin ID (Name)</label>
+                <label>Admin ID</label>
                 <input type="text" id="admin-name" required placeholder="Enter designation...">
             </div>
             <div class="input-group">
-                <label>Clearance Code (Password)</label>
+                <label>Password</label>
                 <input type="password" id="admin-pass" required placeholder="Enter password...">
             </div>
-            <button type="submit" class="btn-login">Initiate Override</button>
+            <button type="submit" class="btn-login">Login</button>
             <div id="error-msg">Authentication failed. Access denied.</div>
         </form>
     </div>
 
     <script>
-        const API_URL = "http://localhost:5000/api";
+        const API_URL = "https://esummit-backend-gonf.onrender.com/api";
 
         document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -71,7 +71,7 @@
             const errorMsg = document.getElementById('error-msg');
 
             try {
-                // Sending credentials to your backend
+                // Sending credentials to backend
                 const res = await fetch(`${API_URL}/admin/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

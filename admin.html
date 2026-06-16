@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mainframe Command | E-Summit</title>
+    <title>Admin Panel | E-Summit</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -135,12 +135,20 @@
     <div class="dashboard-container">
         <!-- HEADER BLOCK -->
         <div class="admin-header">
-            <h1><i class="fa-solid fa-satellite-dish"></i> Mainframe Command</h1>
+            <h1><i class="fa-solid fa-satellite-dish"></i> Admin Panel</h1>
             <div class="tab-menu">
                 <button class="tab-btn active" onclick="switchTab('analytics')">Analytics</button>
                 <button class="tab-btn" onclick="switchTab('utr-queue')">UTR Queue (<span id="queue-badge-count">0</span>)</button>
-                <button class="tab-btn" onclick="switchTab('all-users')">Registered Agents</button>
-                <button class="tab-btn" onclick="systemLogout()" style="color: var(--brand-red); border-color: var(--brand-red);"><i class="fa-solid fa-power-off"></i> Disconnect</button>
+                <button class="tab-btn" onclick="switchTab('all-users')">Registered Users</button>
+                
+                <!-- NEW: Scanner Launch Protocol -->
+                <button class="tab-btn" onclick="window.open('scanner.html', '_blank')" style="color: #3498db; border-color: #3498db;">
+                    <i class="fa-solid fa-qrcode"></i> Launch Scanner
+                </button>
+                
+                <button class="tab-btn" onclick="systemLogout()" style="color: var(--brand-red); border-color: var(--brand-red);">
+                    <i class="fa-solid fa-power-off"></i> Disconnect
+                </button>
             </div>
         </div>
 
@@ -151,7 +159,7 @@
             <div class="stats-grid">
                 <div class="stat-card"><label>Total Registrations</label><div class="num" id="stat-total">--</div></div>
                 <div class="stat-card" style="border-left-color: #2ecc71;"><label>Verified Revenue</label><div class="num" id="stat-revenue">₹--</div></div>
-                <div class="stat-card" style="border-left-color: #3498db;"><label>UIET Ingress</label><div class="num" id="stat-uiet">--</div></div>
+                <div class="stat-card" style="border-left-color: #3498db;"><label>UIET Students</label><div class="num" id="stat-uiet">--</div></div>
                 <div class="stat-card" style="border-left-color: #9b59b6;"><label>Hostel Bookings</label><div class="num" id="stat-hostels">--</div></div>
             </div>
 
@@ -188,7 +196,7 @@
 
         <!-- TAB 3: ALL REGISTERED USERS -->
         <div id="tab-all-users" class="data-panel" style="border-top-color: #3498db;">
-            <h2>Global Agent Database</h2>
+            <h2>Global User Database</h2>
             
             <div class="filters-container">
                 <input type="text" id="filter-search" placeholder="Search by name, email or Pass ID..." oninput="applyUserFilters()" style="flex: 1;">
@@ -200,17 +208,17 @@
                 <select id="filter-type" onchange="applyUserFilters()">
                     <option value="all">All Origins</option>
                     <option value="yes">UIET Students</option>
-                    <option value="no">External Agents</option>
+                    <option value="no">External Users</option>
                 </select>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>Agent Identity</th>
-                        <th>Clearance Vector</th>
-                        <th>Institution / Matrix</th>
-                        <th>Hostel Mapping</th>
+                        <th>User Identity</th>
+                        <th>Payment Status</th>
+                        <th>Institution / Phone</th>
+                        <th>Hostel Alloted</th>
                         <th>Pass ID</th>
                         <th>Actions</th>
                     </tr>
@@ -237,15 +245,14 @@
     </div>
 
     <script>
-        const API_URL = "http://localhost:5000/api";
+        const API_URL = "https://esummit-backend-gonf.onrender.com/api"
         const token = localStorage.getItem('esummit_token');
         let socket;
 
-        // NEW: Fail-safe telemetry connection
         try {
             if (typeof io !== 'undefined') {
                 // Initialize socket only if library is available
-                socket = io("http://localhost:5000");
+                socket = io("https://esummit-backend-gonf.onrender.com");
 
                 // Listen for the backend ping
                 socket.on('mainframe_update', () => {
@@ -256,7 +263,6 @@
                     loadPendingQueue();
                     loadAllUsers();
                     
-                    // Optional: Re-apply filters so the screen doesn't jump if you were searching
                     setTimeout(applyUserFilters, 500);
                 });
             } else {
@@ -325,7 +331,7 @@
             try {
                 const res = await fetch(`${API_URL}/payments/admin/pending`, { headers: { 'Authorization': `Bearer ${token}` } });
                 
-                // NEW: Security Bounce Check
+                // Security Bounce Check
                 if (res.status === 401 || res.status === 403) {
                     console.warn("Invalid clearance. Terminating session.");
                     systemLogout();
@@ -488,7 +494,7 @@
             const tbody = document.getElementById('all-users-table-body');
             
             if (users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No agents match the current filter parameters.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No user match the current filter parameters.</td></tr>`;
                 return;
             }
 

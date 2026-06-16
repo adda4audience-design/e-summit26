@@ -138,14 +138,14 @@
     </div>
 
     <script>
-        const API_URL = "http://localhost:5000/api";
+        const API_URL = "https://esummit-backend-gonf.onrender.com/api";
         const token = localStorage.getItem('esummit_token');
         let isProcessing = false;
 
         // Ensure token exists before allowing scan
         if (!token) {
             alert("Scanner requires volunteer clearance. Redirecting to login.");
-            window.location.href = "login.html"; // Ensure this points to your volunteer login route
+            window.location.href = "login.html";
         }
 
         async function processTicket(ticketId) {
